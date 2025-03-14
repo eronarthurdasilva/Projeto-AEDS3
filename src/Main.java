@@ -9,6 +9,7 @@ public class Main {
     public static void main(String[] args) {
         int opcao = 0;
         do {
+            // Exibe o menu de opções
             System.out.println("\n==============================");
             System.out.println("       MENU DE OPÇÕES");
             System.out.println("==============================");
@@ -23,15 +24,19 @@ public class Main {
             teclado.nextLine();
             switch (opcao) {
                 case 1:
+                    // Carrega o arquivo CSV
                     carregarCSV("Data//synthetic_fraud_dataset.csv");
                     break;
                 case 2:
+                    // Cria um novo registro
                     create();
                     break;
                 case 3:
+                    // Lê um registro
                     read();
                     break;
                 case 4:
+                    // Atualiza um registro
                     try {
                         update();
                     } catch (IOException e) {
@@ -39,12 +44,15 @@ public class Main {
                     }
                     break;
                 case 5:
+                    // Deleta um registro
                     delete();
                     break;
                 case 0:
+                    // Sai do programa
                     System.out.println("Saindo...");
                     break;
                 default:
+                    // Opção inválida
                     System.out.println("Opção inválida!");
             }
         } while (opcao != 0);
@@ -107,19 +115,19 @@ public class Main {
                 }
             }
 
+            // Solicita os dados do usuário
             System.out.println("\n==============================");
             System.out.println("       CRIAR TRANSAÇÃO");
             System.out.println("==============================");
             System.out.println("Total de transações existentes: " + count);
-            System.out.print("User ID: ");
-            String userID = teclado.nextLine();
+            String userID = "User_" + (count + 1);
             System.out.print("Transaction Amount: ");
             float transactionAmount = getValidFloat();
             System.out.print("Transaction Type: ");
             String transactionType = teclado.nextLine();
 
             Transaction txn = new Transaction(count + 1, // ID gerado automaticamente
-                    userID, transactionAmount, transactionType, "2025-03-02 12:00:00", // Data fixa (ajustar depois)
+                    userID, transactionAmount, transactionType, new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()), // Data gerada automaticamente
                     0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false);
 
             byte[] data = txn.toByteArray();

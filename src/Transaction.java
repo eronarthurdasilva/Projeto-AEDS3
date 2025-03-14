@@ -1,29 +1,34 @@
+/*
+ * Projeto AEDs 1 - Implementação do crud de transações
+ * 
+ */
+
 import java.io.*;
 import java.text.DecimalFormat;
 
 class Transaction {
     // Declaração de variáveis
-    protected int transactionID;
-    protected String userID;
-    protected float transactionAmount;
-    protected String transactionType;
-    protected String timestamp;
-    protected float accountBalance;
-    protected String deviceType;
-    protected String location;
-    protected String merchantCategory;
-    protected boolean ipAddressFlag;
-    protected int previousFraudulentActivity;
-    protected int dailyTransactionCount;
-    protected float avgTransactionAmount7d;
-    protected int failedTransactionCount7d;
-    protected String cardType;
-    protected int cardAge;
-    protected float transactionDistance;
-    protected String authenticationMethod;
-    protected float riskScore;
-    protected boolean isWeekend;
-    protected boolean fraudLabel;
+    protected int transactionID; // ID da transação
+    protected String userID; // ID do usuário
+    protected float transactionAmount; // Valor da transação
+    protected String transactionType; // Tipo de transação
+    protected String timestamp; // Data e hora da transação
+    protected float accountBalance; // Saldo da conta após a transação
+    protected String deviceType; // Tipo de dispositivo usado na transação
+    protected String location; // Localização da transação
+    protected String merchantCategory; // Categoria do comerciante
+    protected boolean ipAddressFlag; // Indicador de IP suspeito
+    protected int previousFraudulentActivity; // Número de atividades fraudulentas anteriores
+    protected int dailyTransactionCount; // Contagem diária de transações
+    protected float avgTransactionAmount7d; // Valor médio das transações nos últimos 7 dias
+    protected int failedTransactionCount7d; // Contagem de transações falhadas nos últimos 7 dias
+    protected String cardType; // Tipo de cartão usado na transação
+    protected int cardAge; // Idade do cartão em meses
+    protected float transactionDistance; // Distância entre o local da transação e o endereço do usuário
+    protected String authenticationMethod; // Método de autenticação usado
+    protected float riskScore; // Pontuação de risco da transação
+    protected boolean isWeekend; // Indicador se a transação ocorreu no fim de semana
+    protected boolean fraudLabel; // Indicador se a transação é fraudulenta
 
     // Construtor da classe Transaction
     public Transaction(int transactionID, String userID, float transactionAmount, String transactionType, String timestamp, float accountBalance, String deviceType, String location, String merchantCategory, boolean ipAddressFlag, int previousFraudulentActivity, int dailyTransactionCount, float avgTransactionAmount7d, int failedTransactionCount7d, String cardType, int cardAge, float transactionDistance, String authenticationMethod, float riskScore, boolean isWeekend, boolean fraudLabel) {

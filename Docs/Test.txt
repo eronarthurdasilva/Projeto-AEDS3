@@ -1,0 +1,15 @@
+Teste para o Console
+Opção de Create:
+1- Create
+Transaction Amount: 100
+Transaction type: PIX
+
+Opção read:
+6/7/444/870
+
+Opção Update
+Id: qualquer
+Valor: 300.45
+
+Delete 
+Id: novo gerado
