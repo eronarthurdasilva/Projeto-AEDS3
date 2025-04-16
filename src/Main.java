@@ -3,6 +3,8 @@ import java.util.*;
 
 public class Main {
     private static final String FILENAME = "transactions.db";
+    private static IndexManager indexManager = new IndexManager(4); // ordem 4, por exemplo
+    private static final String SEPARATOR = "==============================";
     private static Scanner teclado = new Scanner(System.in);
 
     // Menu para os comandos do CRUD
@@ -10,9 +12,9 @@ public class Main {
         int opcao = 0;
         do {
             // Exibe o menu de opções
-            System.out.println("\n==============================");
-            System.out.println("       MENU DE OPÇÕES");
-            System.out.println("==============================");
+            System.out.println(SEPARATOR);
+            System.out.println("       MENU PRINCIPAL        ");
+            System.out.println(SEPARATOR);
             System.out.println("1 - Carregar base de dados");
             System.out.println("2 - Create");
             System.out.println("3 - Read");
@@ -91,9 +93,11 @@ public class Main {
                         campos[20].equals("1")  // Fraud_Label
                 );
                 byte[] data = txn.toByteArray();
-                raf.writeBoolean(true); // Lápide (true = ativo)
-                raf.writeInt(data.length); // Tamanho do registro
-                raf.write(data); // Dados serializados
+                long posicaoRegistro = raf.getFilePointer();
+                raf.writeBoolean(true);
+                raf.writeInt(data.length);
+                raf.write(data);
+                indexManager.insert(txn.transactionID, posicaoRegistro);
             }
             System.out.println("Dados carregados com sucesso!");
         } catch (IOException e) {
@@ -131,9 +135,11 @@ public class Main {
                     0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false);
 
             byte[] data = txn.toByteArray();
-            raf.writeBoolean(true); // Lápide (true = ativo)
-            raf.writeInt(data.length); // Tamanho do registro
-            raf.write(data); // Dados serializados
+            long posicaoRegistro = raf.getFilePointer();
+            raf.writeBoolean(true);
+            raf.writeInt(data.length);
+            raf.write(data);
+            indexManager.insert(txn.transactionID, posicaoRegistro);
             System.out.println("Transação criada com sucesso!");
             System.out.println(txn);
         } catch (IOException e) {
@@ -165,6 +171,24 @@ public class Main {
             }
             System.out.println("Transação não encontrada!");
         } catch (IOException e) {
+            System.out.println("Erro ao ler transação: " + e.getMessage());
+        }
+        Long posicao = indexManager.search(id);
+        if (posicao == null) {
+            System.out.println("Transação não encontrada!");
+            return;
+        }
+        try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
+            raf.seek(posicao);
+            boolean lapide = raf.readBoolean();
+            int tamanho = raf.readInt();
+            byte[] data = new byte[tamanho];
+            raf.read(data);
+            Transaction txn = Transaction.fromByteArray(data);
+            if (lapide) System.out.println(txn);
+            else System.out.println("Transação deletada!");
+        }
+        catch (IOException e) {
             System.out.println("Erro ao ler transação: " + e.getMessage());
         }
     }
@@ -214,6 +238,9 @@ public class Main {
             raf.writeInt(dataAtualizado.length); // Tamanho do registro
             raf.write(dataAtualizado); // Dados serializados
 
+            // Atualiza o índice com a nova posição
+            indexManager.insert(id, posicao);
+
             System.out.println("Transação atualizada com sucesso!");
             System.out.println(txTransaction);
         } catch (IOException e) {
@@ -229,6 +256,7 @@ public class Main {
         System.out.print("Digite o Transaction ID a ser deletado: ");
         int id = teclado.nextInt();
         teclado.nextLine();
+        indexManager.remove(id);
 
         try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "rw")) {
             long posicao = -1; // Posição inicial
