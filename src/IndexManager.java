@@ -42,4 +42,8 @@ public class IndexManager {
         // Add actual removal logic here
     }
 
+    public void printIndexTree() {
+        bPlusTree.printTree();
+    }
+
 }

@@ -20,14 +20,18 @@ public class Main {
             System.out.println("3 - Read");
             System.out.println("4 - Update");
             System.out.println("5 - Delete");
+            System.out.println("6 - Imprimir árvore B+");
             System.out.println("0 - Sair");
             System.out.print("Digite a opção desejada: ");
             opcao = teclado.nextInt();
             teclado.nextLine();
             switch (opcao) {
                 case 1:
-                    // Carrega o arquivo CSV
-                    carregarCSV("Data//synthetic_fraud_dataset.csv");
+                    if (!baseDeDadosExiste()) {
+                        carregarCSV("Data//synthetic_fraud_dataset.csv");
+                    } else {
+                        System.out.println("A base de dados já existe!");
+                    }
                     break;
                 case 2:
                     // Cria um novo registro
@@ -49,6 +53,11 @@ public class Main {
                     // Deleta um registro
                     delete();
                     break;
+                case 6:
+                    reconstruirIndice();
+                    System.out.println("Árvore B+:");
+                    indexManager.printIndexTree();
+                    break;
                 case 0:
                     // Sai do programa
                     System.out.println("Saindo...");
@@ -58,6 +67,12 @@ public class Main {
                     System.out.println("Opção inválida!");
             }
         } while (opcao != 0);
+    }
+
+    // Método para verificar se o arquivo de dados já existe
+    private static boolean baseDeDadosExiste() {
+        File f = new File(FILENAME);
+        return f.exists() && f.length() > 0;
     }
 
     // Método para carregar o arquivo CSV
@@ -300,6 +315,29 @@ public class Main {
                 System.out.print("Valor inválido. Digite um número válido: ");
                 teclado.next(); // Limpa a entrada inválida
             }
+        }
+    }
+
+
+    /**
+     * Reconstrói o índice B+ a partir do arquivo de dados.
+     */
+    private static void reconstruirIndice() {
+        indexManager = new IndexManager(4); // Limpa o índice atual
+        try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
+            while (raf.getFilePointer() < raf.length()) {
+                long posicao = raf.getFilePointer();
+                boolean lapide = raf.readBoolean();
+                int tamanho = raf.readInt();
+                byte[] data = new byte[tamanho];
+                raf.read(data);
+                if (lapide) {
+                    Transaction txn = Transaction.fromByteArray(data);
+                    indexManager.insert(txn.transactionID, posicao);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao reconstruir índice: " + e.getMessage());
         }
     }
 }

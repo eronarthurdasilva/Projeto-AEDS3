@@ -90,5 +90,38 @@ public class BPlusTree {
         }
 
     }
+
+    /**
+     * Exibe a estrutura da árvore B+ (IDs por nível).
+     */
+    public void printTree() {
+        if (root == null) {
+            System.out.println("A árvore está vazia.");
+            return;
+        }
+        Queue<BPlusNode> queue = new LinkedList<>();
+        queue.add(root);
+        int level = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            System.out.print("Nível " + level + ": ");
+            for (int i = 0; i < size; i++) {
+                BPlusNode node = queue.poll();
+                System.out.print("{ ");
+                for (int j = 0; j < node.keys.size(); j++) {
+                    System.out.print(node.keys.get(j));
+                    if (j < node.keys.size() - 1) {
+                        System.out.print(", ");
+                    }
+                }
+                System.out.print(" } ");
+                if (!node.isLeaf && node.children != null) {
+                    queue.addAll(node.children);
+                }
+            }
+            System.out.println(); // Nova linha para cada nível
+            level++;
+        }
+    }
     
 }

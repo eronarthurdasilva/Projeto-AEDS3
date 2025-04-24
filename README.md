@@ -179,9 +179,6 @@ Não existe um único tipo de indexação que seja "o melhor" para todas as situ
 | **Multinível**    | Muito eficiente para grandes volumes, escalável | Mais complexo, manutenção de índices      | Grandes bases de dados, buscas rápidas       |
 | **Invertido**     | Excelente para buscas por múltiplos campos não ordenados | Mais espaço, manutenção complexa          | Sistemas de busca textual, consultas flexíveis |
 
-### **📌 Resumo da Aula**
-
-A aula destaca que índices multiníveis (como árvores B ou B+) são os mais eficientes para grandes volumes de dados, pois permitem buscas, inserções e remoções rápidas, mesmo em arquivos muito grandes. Já os índices simples são mais indicados para arquivos pequenos ou quando a simplicidade é mais importante que a performance.
 
 ### **📌 Hashing Estendido — Estrutura e Justificativa**
 
