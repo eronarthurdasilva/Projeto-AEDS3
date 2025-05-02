@@ -106,108 +106,78 @@ A classe `Main` gerencia o fluxo do programa e implementa as operações CRUD.
 Este projeto demonstra a implementação de um **CRUD robusto**, além de aprender o funcionamento de um banco de dados, para gerenciamento de uma base de dados utilizada, utilizando **arquivos binários** para armazenamento persistente. A modularidade do código facilita a **manutenção e expansão futura**, permitindo a adição de novas funcionalidades conforme necessário.
 
 ## Parte II
-### **📌 Manipulação Indexada da Base de Dados**
+### 📌 Manipulação Indexada da Base de Dados
 
-Nesta segunda parte do projeto, o objetivo é implementar uma abordagem de **indexação** para a base de dados criada na Parte I, utilizando estruturas eficientes para acesso rápido aos registros. Todas as operações CRUD (**Create, Read, Update, Delete**) serão otimizadas por meio de um índice, eliminando a necessidade de percorrer todo o arquivo.
+Nesta segunda parte do projeto, implementei uma abordagem de **indexação** para a base de dados criada na Parte I, utilizando duas estruturas eficientes para acesso rápido aos registros: **Árvore B+** e **Hashing Estendido**. Agora, todas as operações CRUD (Create, Read, Update, Delete) são otimizadas por meio de um índice, eliminando a necessidade de percorrer todo o arquivo sequencialmente.
 
-### **📂 Estrutura de Indexação com Árvore B+**
+---
 
-#### **Por que usar Árvore B+?**
-A **Árvore B+** foi escolhida como estrutura de indexação devido às suas vantagens em operações de disco e buscas sequenciais. Suas características incluem:
-- Todas as chaves estão nas folhas, permitindo buscas rápidas e eficientes.
-- As folhas são encadeadas, facilitando operações como **range queries**.
-- É amplamente utilizada em sistemas de banco de dados para indexação.
+### 📂 Estrutura de Indexação com Árvore B+
 
-#### **Como funciona a Árvore B+ no projeto?**
-1. **Estrutura Geral**:
-  - Cada nó pode ter até `ordem` filhos (parametrizável).
-  - As folhas armazenam pares `(id, posiçãoNoArquivo)`.
+#### Por que escolhi a Árvore B+?
+Optei pela **Árvore B+** como índice principal porque ela é amplamente utilizada em bancos de dados reais devido à sua eficiência em operações de disco e buscas sequenciais. Suas principais vantagens são:
+- Todas as chaves ficam nas folhas, o que permite buscas rápidas e eficientes.
+- As folhas são encadeadas, facilitando buscas por intervalos (range queries).
+- A ordem da árvore é parametrizável, permitindo ajustar o desempenho conforme o volume de dados.
 
-2. **Operações CRUD com Índice**:
-  - **Inserção**:
-    - Escreve o registro no arquivo de dados.
-    - Insere o par `(id, posição)` na Árvore B+.
-    - Salva a Árvore B+ no arquivo de índices.
-  - **Busca**:
-    - Consulta o índice pelo `id` na Árvore B+.
-    - Obtém a posição no arquivo e lê o registro correspondente.
-  - **Atualização**:
-    - Atualiza o registro no arquivo de dados.
-    - Atualiza o índice, se necessário.
-  - **Remoção**:
-    - Marca o registro como excluído no arquivo de dados.
-    - Remove o par `(id, posição)` da Árvore B+.
+#### Como funciona a Árvore B+ no projeto?
+- **Estrutura:** Cada nó pode ter até `ordem` filhos (parametrizável). As folhas armazenam pares `(id, posiçãoNoArquivo)`, onde `id` é o identificador único da transação e `posiçãoNoArquivo` é o offset do registro no arquivo binário.
+- **Operações CRUD:**
+  - **Inserção:** Ao criar um registro, ele é escrito no arquivo binário e o par `(id, posição)` é inserido na Árvore B+.
+  - **Busca:** O índice é consultado pelo `id`, retornando a posição do registro para leitura direta.
+  - **Atualização:** O registro é atualizado no arquivo e o índice é mantido sincronizado.
+  - **Remoção:** O registro é marcado como excluído (lápide) e removido do índice.
+- **Impressão:** A árvore pode ser impressa no console, mostrando os IDs presentes em cada nó por nível, facilitando a visualização da estrutura.
 
-#### **📜 Classes Sugeridas**
-Para implementar a indexação, as seguintes classes serão criadas:
+---
 
-- **`BPlusTree.java`**: Implementa a lógica da Árvore B+.
-- **`BPlusNode.java`**: Representa os nós da Árvore B+.
-- **`IndexEntry.java`**: Armazena pares `(id, posiçãoNoArquivo)`.
-- **`IndexManager.java`**: Gerencia a persistência do índice em arquivo.
+### 📂 Estrutura de Indexação com Hashing Estendido
 
-#### **📈 Benefícios**
-- **Acesso Rápido**: As operações CRUD serão significativamente mais rápidas, mesmo com grandes volumes de dados.
-- **Escalabilidade**: A estrutura é adequada para bases de dados maiores e mais complexas.
-- **Manutenção Simplificada**: A modularidade do índice facilita a manutenção e futuras expansões.
+#### Por que implementei o Hashing Estendido?
+Implementei o **Hashing Estendido** como alternativa para acesso direto e eficiente, especialmente útil para buscas exatas. Ele permite que o sistema cresça dinamicamente conforme o volume de dados aumenta, sem a necessidade de reorganização completa.
 
-### **📌 Tipos de Indexação Apresentados na Aula**
+#### Como funciona o Hashing Estendido no projeto?
+- **Estrutura:**
+  - **Diretório:** Um array de ponteiros para buckets, cujo tamanho é sempre uma potência de 2 (2^d, onde d é a profundidade global).
+  - **Buckets:** Cada bucket armazena até X pares `(id, posiçãoNoArquivo)`. O valor de X (por exemplo, 4) é parametrizável.
+- **Função Hash:** Utilizo `id % 2^d` para determinar o bucket de cada registro.
+- **Operações CRUD:**
+  - **Inserção:** O hash do `id` determina o bucket. Se o bucket estiver cheio, ocorre um split (divisão) e, se necessário, o diretório é expandido.
+  - **Busca:** O hash do `id` leva diretamente ao bucket correto, onde a busca é feita.
+  - **Atualização:** O registro é localizado pelo hash e atualizado.
+  - **Remoção:** O registro é localizado pelo hash e removido do bucket.
+- **Impressão:** O hash pode ser impresso no console, mostrando cada bucket, sua profundidade local e os pares `(id, posição)` armazenados. Exemplo:
+Bucket 0 (profundidade 2): (1, 0) (5, 128) Bucket 1 (profundidade 2): (2, 32)
 
-A aula aborda principalmente os seguintes tipos de indexação:
+---
 
-#### **Índice Simples**
-- Um índice para todo o arquivo, geralmente ordenado pela chave de busca.
-- Pode ser **denso** (uma entrada para cada registro) ou **esparso** (uma entrada para cada bloco).
+### 📌 Qual índice foi utilizado e por quê?
 
-#### **Índice Composto**
-- Utiliza mais de um campo como chave de indexação.
+- **Campo indexado:** O campo escolhido para indexação foi o `id` (Transaction_ID), pois é único e garante eficiência nas operações de busca, inserção e remoção.
+- **Árvore B+:** Escolhida como índice principal por sua eficiência em buscas sequenciais, escalabilidade e uso consolidado em bancos de dados.
+- **Hashing Estendido:** Implementado para comparação e para oferecer acesso direto eficiente, especialmente útil para buscas exatas e para demonstrar domínio de diferentes técnicas de indexação.
 
-#### **Índice Multinível**
-- Um índice sobre outro índice, formando uma hierarquia (ex.: árvore B ou B+).
+---
 
-#### **Índice Invertido**
-- Usado quando há busca por múltiplos campos não ordenados.
+### 📈 Como é feita a impressão das estruturas?
 
-### **📌 Qual é o Melhor Tipo de Indexação?**
+- **Árvore B+:**  
+- Impressa por nível, mostrando os IDs presentes em cada nó.  
+- Exemplo de saída:
+  ```
+  [10, 20]
+  [5, 8] [12, 15, 18] [22, 25]
+  ```
+- **Hashing Estendido:**  
+- Impressão mostra cada bucket, sua profundidade local e os pares armazenados.
+- Exemplo de saída:
+  ```
+  Bucket 0 (profundidade 2): (1, 0) (5, 128)
+  Bucket 1 (profundidade 2): (2, 32)
+  ```
 
-Não existe um único tipo de indexação que seja "o melhor" para todas as situações. A escolha depende do contexto de uso, volume de dados, tipo de consultas e operações realizadas.
+---
 
-| Tipo de Índice   | Vantagens                                   | Desvantagens                              | Quando Usar                                   |
-|-------------------|--------------------------------------------|-------------------------------------------|----------------------------------------------|
-| **Simples**       | Fácil de implementar, rápido para buscas sequenciais | Pode ser lento para grandes volumes, atualização trabalhosa | Arquivos pequenos ou buscas simples          |
-| **Composto**      | Permite buscas por múltiplos campos        | Mais complexo, ocupa mais espaço          | Quando buscas envolvem mais de um campo      |
-| **Multinível**    | Muito eficiente para grandes volumes, escalável | Mais complexo, manutenção de índices      | Grandes bases de dados, buscas rápidas       |
-| **Invertido**     | Excelente para buscas por múltiplos campos não ordenados | Mais espaço, manutenção complexa          | Sistemas de busca textual, consultas flexíveis |
+### 📌 Conclusão
 
-
-### **📌 Hashing Estendido — Estrutura e Justificativa**
-
-#### **Justificativa**
-- **Campo indexado**: `id` (Transaction_ID), pois é único e usado para busca direta.
-- **Função hash**: Usaremos `id % 2^d` (onde `d` é a profundidade global).
-- **Tamanho do bucket**: Por exemplo, 4 registros por bucket (parametrizável).
-- **Motivo**: O Hashing Estendido permite crescimento dinâmico e acesso direto eficiente.
-
-#### **Como funciona o Hashing Estendido?**
-1. **Estrutura Geral**:
-   - Utiliza uma tabela de diretórios que aponta para buckets.
-   - Cada bucket armazena registros com o mesmo valor de hash.
-
-2. **Operações CRUD**:
-   - **Inserção**:
-     - Calcula o hash do `id` e insere no bucket correspondente.
-     - Se o bucket estiver cheio, ocorre um **split** (divisão do bucket).
-   - **Busca**:
-     - Calcula o hash do `id` e acessa diretamente o bucket correspondente.
-   - **Atualização**:
-     - Localiza o registro pelo hash e atualiza os dados.
-   - **Remoção**:
-     - Localiza o registro pelo hash e o remove do bucket.
-
-#### **📈 Benefícios do Hashing Estendido**
-- **Acesso Direto**: Operações de busca e inserção são extremamente rápidas.
-- **Crescimento Dinâmico**: A estrutura se adapta ao aumento de dados sem necessidade de reorganização completa.
-- **Eficiência**: Ideal para buscas diretas em grandes volumes de dados.
-
-Combinando a Árvore B+ para indexação sequencial e o Hashing Estendido para acesso direto, o sistema se tornará robusto, eficiente e escalável, atendendo a diferentes tipos de consultas e operações.
-
+Com a implementação da Árvore B+ e do Hashing Estendido, o sistema ficou robusto, eficiente e escalável, atendendo a diferentes tipos de consultas e operações. O usuário pode alternar entre os índices pelo menu, e todas as operações CRUD são otimizadas pelo índice selecionado, garantindo acesso rápido e seguro aos dados.

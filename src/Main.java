@@ -6,6 +6,10 @@ public class Main {
     private static IndexManager indexManager = new IndexManager(4); // ordem 4, por exemplo
     private static final String SEPARATOR = "==============================";
     private static Scanner teclado = new Scanner(System.in);
+    private static ExtendibleHash hash = new ExtendibleHash(2,4); // Profundidade inicial 2, tamanho do bucket 4
+    private static ExtendibleHash hashIndex = new ExtendibleHash(2,4); // Inicializa hashIndex
+    private static String indiceAtual = "BPLUS"; // Indica o tipo de índice atual
+
 
     // Menu para os comandos do CRUD
     public static void main(String[] args) {
@@ -21,6 +25,8 @@ public class Main {
             System.out.println("4 - Update");
             System.out.println("5 - Delete");
             System.out.println("6 - Imprimir árvore B+");
+            System.out.println("7 - Trocar indice (Atual: " + indiceAtual + ")");
+            System.out.println("8 - Imprimir Hash Extendível");
             System.out.println("0 - Sair");
             System.out.print("Digite a opção desejada: ");
             opcao = teclado.nextInt();
@@ -57,6 +63,16 @@ public class Main {
                     reconstruirIndice();
                     System.out.println("Árvore B+:");
                     indexManager.printIndexTree();
+                    break;
+
+                case 7:
+                    if (indiceAtual.equals("BPLUS")) indiceAtual = "HASH";
+                    else indiceAtual = "BPLUS";
+                    System.out.println("Índice agora: " + indiceAtual);
+                    break;
+                
+                case 8:
+                    hashIndex.printHash();
                     break;
                 case 0:
                     // Sai do programa
@@ -154,7 +170,11 @@ public class Main {
             raf.writeBoolean(true);
             raf.writeInt(data.length);
             raf.write(data);
-            indexManager.insert(txn.transactionID, posicaoRegistro);
+            // INSERÇÃO NO ÍNDICE ESCOLHIDO
+            if (indiceAtual.equals("BPLUS"))
+                indexManager.insert(txn.transactionID, posicaoRegistro);
+            else
+                hashIndex.insert(txn.transactionID, posicaoRegistro);
             System.out.println("Transação criada com sucesso!");
             System.out.println(txn);
         } catch (IOException e) {
@@ -170,29 +190,19 @@ public class Main {
         System.out.print("Digite o ID da transação: ");
         int id = teclado.nextInt();
         teclado.nextLine();
-
-        try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
-            while (raf.getFilePointer() < raf.length()) {
-                boolean lapide = raf.readBoolean(); // Verifica se tem alguma lápide
-                int tamanho = raf.readInt(); // Verifica o tamanho do registro
-                byte[] data = new byte[tamanho]; // Cria um array de bytes com o tamanho do registro
-                raf.read(data); // Lê o registro
-
-                Transaction txn = Transaction.fromByteArray(data);
-                if (lapide && txn.transactionID == id) {
-                    System.out.println(txn);
-                    return;
-                }
-            }
-            System.out.println("Transação não encontrada!");
-        } catch (IOException e) {
-            System.out.println("Erro ao ler transação: " + e.getMessage());
-        }
-        Long posicao = indexManager.search(id);
+    
+        // Busca a posição no índice selecionado
+        Long posicao;
+        if (indiceAtual.equals("BPLUS"))
+            posicao = indexManager.search(id);
+        else
+            posicao = hashIndex.search(id);
+    
         if (posicao == null) {
             System.out.println("Transação não encontrada!");
             return;
         }
+    
         try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
             raf.seek(posicao);
             boolean lapide = raf.readBoolean();
@@ -200,10 +210,11 @@ public class Main {
             byte[] data = new byte[tamanho];
             raf.read(data);
             Transaction txn = Transaction.fromByteArray(data);
-            if (lapide) System.out.println(txn);
-            else System.out.println("Transação deletada!");
-        }
-        catch (IOException e) {
+            if (lapide)
+                System.out.println(txn);
+            else
+                System.out.println("Transação deletada!");
+        } catch (IOException e) {
             System.out.println("Erro ao ler transação: " + e.getMessage());
         }
     }
@@ -216,46 +227,49 @@ public class Main {
         System.out.print("Digite o ID a ser atualizado: ");
         int id = teclado.nextInt();
         teclado.nextLine();
-
+    
+        // Busca a posição no índice selecionado
+        Long posicao;
+        if (indiceAtual.equals("BPLUS"))
+            posicao = indexManager.search(id);
+        else
+            posicao = hashIndex.search(id);
+    
+        if (posicao == null) {
+            System.out.println("Transação não encontrada!");
+            return;
+        }
+    
         try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "rw")) {
-            long posicao = -1; // Posição inicial
-            boolean encontrada = false; // Variável para verificar se a transação foi encontrada
-
-            while (raf.getFilePointer() < raf.length()) {
-                long posInicio = raf.getFilePointer(); // Posição inicial
-                boolean lapide = raf.readBoolean(); // Verifica se tem alguma lápide
-                int tamanho = raf.readInt(); // Verifica o tamanho do registro
-                byte[] data = new byte[tamanho]; // Cria um array de bytes com o tamanho do registro
-                raf.read(data); // Lê o registro
-
-                Transaction txn = Transaction.fromByteArray(data);
-                if (lapide && txn.transactionID == id) {
-                    posicao = posInicio; // Posição atual
-                    encontrada = true; // Transação encontrada
-                    break;
-                }
-            }
-
-            if (!encontrada) {
-                System.out.println("Transação não encontrada!");
+            raf.seek(posicao);
+            boolean lapide = raf.readBoolean();
+            int tamanho = raf.readInt();
+            byte[] data = new byte[tamanho];
+            raf.read(data);
+    
+            if (!lapide) {
+                System.out.println("Transação deletada!");
                 return;
             }
-
+    
             System.out.print("Nova Transaction Amount: ");
             float newAmount = getValidFloat();
             System.out.print("Novo Transaction Type: ");
             String newType = teclado.nextLine();
-
+    
             Transaction txTransaction = new Transaction(id, "", newAmount, newType, "", 0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false);
             byte[] dataAtualizado = txTransaction.toByteArray();
-            raf.seek(posicao); // Posiciona o ponteiro na posição da transação
-            raf.writeBoolean(true); // Lápide
-            raf.writeInt(dataAtualizado.length); // Tamanho do registro
-            raf.write(dataAtualizado); // Dados serializados
-
-            // Atualiza o índice com a nova posição
-            indexManager.insert(id, posicao);
-
+            raf.seek(posicao);
+            raf.writeBoolean(true);
+            raf.writeInt(dataAtualizado.length);
+            raf.write(dataAtualizado);
+    
+            // ATUALIZA O ÍNDICE ESCOLHIDO
+            if (indiceAtual.equals("BPLUS"))
+                indexManager.insert(id, posicao);
+            else
+                hashIndex.insert(id, posicao);
+    
             System.out.println("Transação atualizada com sucesso!");
             System.out.println(txTransaction);
         } catch (IOException e) {
@@ -271,35 +285,28 @@ public class Main {
         System.out.print("Digite o Transaction ID a ser deletado: ");
         int id = teclado.nextInt();
         teclado.nextLine();
-        indexManager.remove(id);
-
+    
+        // Remove do índice selecionado
+        if (indiceAtual.equals("BPLUS"))
+            indexManager.remove(id);
+        else
+            hashIndex.delete(id);
+    
+        // Busca a posição no índice selecionado
+        Long posicao;
+        if (indiceAtual.equals("BPLUS"))
+            posicao = indexManager.search(id);
+        else
+            posicao = hashIndex.search(id);
+    
+        if (posicao == null) {
+            System.out.println("Transação não encontrada!");
+            return;
+        }
+    
         try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "rw")) {
-            long posicao = -1; // Posição inicial
-            boolean encontrada = false; // Variável para verificar se a transação foi encontrada
-
-            while (raf.getFilePointer() < raf.length()) {
-                long posInicio = raf.getFilePointer(); // Posição inicial
-                boolean lapide = raf.readBoolean(); // Verifica se tem alguma lápide
-                int tamanho = raf.readInt(); // Verifica o tamanho do registro
-                byte[] data = new byte[tamanho]; // Cria um array de bytes com o tamanho do registro
-                raf.read(data); // Lê o registro
-
-                Transaction txn = Transaction.fromByteArray(data);
-                if (lapide && txn.transactionID == id) {
-                    posicao = posInicio; // Posição atual
-                    encontrada = true; // Transação encontrada
-                    break;
-                }
-            }
-
-            if (!encontrada) {
-                System.out.println("Transação não encontrada!");
-                return;
-            }
-
             raf.seek(posicao);
             raf.writeBoolean(false); // Marca lápide como false
-
             System.out.println("Transação deletada com sucesso!");
         } catch (IOException e) {
             System.out.println("Erro ao deletar transação: " + e.getMessage());
