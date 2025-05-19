@@ -191,4 +191,5 @@ class Transaction {
                 dailyTransactionCount, avgTransactionAmount7d, failedTransactionCount7d, cardType, cardAge,
                 transactionDistance, authenticationMethod, riskScore, isWeekend, fraudLabel);
     }
+
 }

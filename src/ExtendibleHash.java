@@ -44,11 +44,11 @@ public class ExtendibleHash {
         Bucket bucket = directory.get(index);
 
         if (!bucket.isFull(bucketSize)) {
-            // Adiciona a chave e o valor ao bucket se não estiver cheio
             bucket.keys.add(key);
             bucket.values.add(value);
+            System.out.println("Inserido: (" + key + ", " + value + ") no Bucket " + index);
         } else {
-            // Trata o caso de overflow do bucket
+            System.out.println("Bucket " + index + " cheio. Dividindo...");
             handleBucketOverflow(bucket, key, value);
         }
     }
@@ -130,7 +130,7 @@ public class ExtendibleHash {
      */
     private void updateDirectory(Bucket bucket, Bucket newBucket) {
         for (int i = 0; i < directory.size(); i++) {
-            if (directory.get(i).localDepth == bucket.localDepth) {
+            if (directory.get(i) == bucket && (i & (1 << (bucket.localDepth - 1))) != 0) {
                 directory.set(i, newBucket);
             }
         }
@@ -165,6 +165,9 @@ public class ExtendibleHash {
         if (keyIndex != -1) {
             bucket.keys.remove(keyIndex);
             bucket.values.remove(keyIndex);
+            System.out.println("Chave " + key + " removida com sucesso.");
+        }else{
+            System.out.println("Chave " + key + " não encontrada.");
         }
     }
 
@@ -205,6 +208,18 @@ public class ExtendibleHash {
          */
         public boolean isFull(int bucketSize) {
             return keys.size() >= bucketSize;
+        }
+    }
+    public void debugPrint() {
+        System.out.println("Estado do Hashing Estendido:");
+        System.out.println("Profundidade Global: " + globalDepth);
+        for (int i = 0; i < directory.size(); i++) {
+            Bucket b = directory.get(i);
+            System.out.print("Bucket " + i + " (profundidade " + b.localDepth + "): ");
+            for (int j = 0; j < b.keys.size(); j++) {
+                System.out.print("(" + b.keys.get(j) + ", " + b.values.get(j) + ") ");
+            }
+            System.out.println();
         }
     }
 }

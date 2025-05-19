@@ -49,4 +49,9 @@ public class IndexEntry {
     public void setFilePosition(long filePosition) {
         this.filePosition = filePosition;
     }
+
+        @Override
+    public String toString() {
+        return "IndexEntry{id=" + id + ", filePosition=" + filePosition + "}";
+    }
 }

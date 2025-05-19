@@ -181,3 +181,99 @@ Bucket 0 (profundidade 2): (1, 0) (5, 128) Bucket 1 (profundidade 2): (2, 32)
 ### 📌 Conclusão
 
 Com a implementação da Árvore B+ e do Hashing Estendido, o sistema ficou robusto, eficiente e escalável, atendendo a diferentes tipos de consultas e operações. O usuário pode alternar entre os índices pelo menu, e todas as operações CRUD são otimizadas pelo índice selecionado, garantindo acesso rápido e seguro aos dados.
+
+## Parte III
+### 📌 Compressão de Dados na Base de Dados
+
+Nesta terceira parte, o sistema foi expandido para suportar **compressão e descompressão** da base de dados utilizando dois algoritmos clássicos: **Huffman** e **LZW**. O objetivo é permitir ao usuário reduzir o espaço ocupado pelo arquivo de dados e comparar o desempenho dos algoritmos.
+
+---
+
+### 📂 Mudanças e Atualizações no Projeto
+
+- **Novas opções no menu principal:**
+  - `11 - Comprimir base de dados`
+  - `12 - Descomprimir base de dados`
+- **Implementação dos algoritmos de compressão:**
+  - **Huffman:** Algoritmo de compressão baseado em árvore binária e frequência dos bytes.
+  - **LZW:** Algoritmo de compressão baseado em dicionário dinâmico.
+- **Geração de arquivos comprimidos:**
+  - Após a compressão, são criados arquivos com o nome `transactions.dbHuffmanX` ou `transactions.dbLZWX`, onde `X` é a versão da compressão.
+- **Comparação automática dos algoritmos:**
+  - O sistema mostra ao usuário a porcentagem de compressão e o tempo de execução de cada algoritmo, indicando qual foi mais eficiente para o arquivo atual.
+- **Descompressão:**
+  - O usuário pode escolher qual versão e algoritmo deseja descomprimir. O arquivo original é substituído pelo descomprimido.
+- **Compressão e descompressão abrangem todo o arquivo:**  
+  Incluindo cabeçalho, tamanhos de strings e todos os campos binários.
+
+---
+
+### 🛠️ Como funciona a compressão e descompressão
+
+- **Compressão:**
+  1. O usuário escolhe a opção de compressão no menu.
+  2. O sistema lê todo o arquivo de dados (`transactions.db`).
+  3. Aplica os algoritmos de Huffman e LZW separadamente.
+  4. Salva os arquivos comprimidos e exibe o tempo e a taxa de compressão de cada um.
+  5. Informa qual algoritmo foi mais eficiente.
+
+- **Descompressão:**
+  1. O usuário escolhe a opção de descompressão no menu.
+  2. Informa o algoritmo e a versão desejada.
+  3. O sistema descomprime o arquivo escolhido e substitui o arquivo de dados original.
+  4. Exibe o tempo de descompressão e qual algoritmo foi mais eficiente.
+
+---
+
+### 📋 Exemplo de uso no menu
+
+```
+11 - Comprimir base de dados
+12 - Descomprimir base de dados
+```
+
+Ao escolher **11**, a saída será semelhante a:
+```
+Huffman: 45.32% de compressão, tempo: 120 ms
+LZW: 38.10% de compressão, tempo: 80 ms
+LZW foi mais eficiente nesta compressão.
+```
+
+Ao escolher **12**, o sistema solicitará o algoritmo e a versão, e mostrará o tempo de descompressão.
+
+---
+
+### 📦 Arquivos adicionados
+
+- `src/Huffman.java` — Implementação do algoritmo de compressão e descompressão Huffman.
+- `src/LZW.java` — Implementação do algoritmo de compressão e descompressão LZW.
+- Atualizações em `src/Main.java` para incluir as opções de compressão/descompressão e integração com os algoritmos.
+
+---
+
+### 📈 Como testar
+
+1. Realize operações CRUD normalmente.
+2. Escolha a opção de compressão para gerar arquivos comprimidos.
+3. Compare os resultados e escolha a melhor opção para seu caso.
+4. Use a opção de descompressão para restaurar o arquivo original.
+
+---
+
+### 📚 O que você aprende com isso?
+
+- Como aplicar algoritmos clássicos de compressão em arquivos binários reais.
+- Como comparar desempenho e eficiência de algoritmos.
+- Como integrar novas funcionalidades a um sistema já existente de forma modular.
+
+---
+
+### 🚩 Observações
+
+- Sempre que o arquivo de dados for comprimido ou descomprimido, os índices devem ser reconstruídos para garantir a consistência.
+- O dicionário inicial do LZW pode ser ajustado conforme a necessidade do projeto.
+- O sistema está preparado para ser expandido com novos algoritmos de compressão no futuro.
+
+---
+
+Com a **Parte III**, o projeto se torna ainda mais completo, permitindo não só o gerenciamento eficiente dos dados, mas também a otimização do espaço em disco e o estudo prático de algoritmos de compressão.

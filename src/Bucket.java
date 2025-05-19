@@ -39,4 +39,8 @@ public class Bucket {
     public boolean isFull(int bucketSize){
         return keys.size() >= bucketSize;
     }
+    
+    public String toString() {
+        return "Bucket{keys=" + keys + ", values=" + values + ", localDepth=" + localDepth + "}";
+    }
 }

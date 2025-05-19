@@ -32,11 +32,20 @@ public class BPlusNode {
     List<Integer> keys;
     List<Long> values; // Só usado em folhas
     List<BPlusNode> children;
+    BPlusNode next;
+    BPlusNode parent; // Referência para o nó pai
 
     public BPlusNode(boolean isLeaf) {
         this.isLeaf = isLeaf;
         this.keys = new ArrayList<>();
         this.values = isLeaf ? new ArrayList<>() : null;
         this.children = isLeaf ? null : new ArrayList<>();
+        this.next = null; // Usado para encadear folhas
     }
+
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+
+    
 }
