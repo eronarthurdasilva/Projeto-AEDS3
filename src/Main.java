@@ -531,7 +531,7 @@ public class Main {
         String algoritmo = teclado.nextLine().trim();
         System.out.println("Digite a versão (1 ou 2): ");
         String versao = teclado.nextLine().trim();
-        String arquivo = FILENAME + algoritmo + versao;
+        String arquivo = "Compressed/" + FILENAME + algoritmo + versao;
 
         File compressedFile = new File(arquivo);
         if(!compressedFile.exists()) {
