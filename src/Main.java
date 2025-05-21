@@ -128,6 +128,7 @@ public class Main {
         File f = new File(FILENAME);
         return f.exists() && f.length() > 0;
     }
+
     // Método para carregar os dados do CSV e criar o arquivo binário
     public static void carregarCSV(String filePath) {
         File dbFile = new File(FILENAME);
@@ -289,6 +290,7 @@ public class Main {
         System.out.print("Digite o ID a ser atualizado: ");
         int id = teclado.nextInt();
         teclado.nextLine();
+        // Solicite apenas os campos a serem alterados e mantenha os outros
     
         // Busca a posição no índice selecionado
         Long posicao;
@@ -387,9 +389,23 @@ public class Main {
         }
     }
 
+    // Método para verificar os valores interiros
+    private static int getValidInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                int val = teclado.nextInt();
+                teclado.nextLine();
+                return val;
+            } catch (InputMismatchException e) {
+                System.out.println("Valor inválido. Digite um número inteiro válido.");
+                teclado.nextLine(); // Limpa entrada inválida
+            }
+        }
+    }
+
     /*
      * Método para reconstruir o índice B+ ou Hash Extendível
-     * 
      */
     private static void reconstruirIndice() {
         if (indiceAtual.equals("BPLUS")) {
@@ -470,6 +486,10 @@ public class Main {
         }
     }
 
+    /*
+     * Metodo para comprimir a base de dados
+     * Utiliza os algoritmos Huffman e LZW
+     */
     private static void comprimirBaseDeDados(){
         File pasta = new File("Compressed");
         if (!pasta.exists()) {
@@ -523,7 +543,7 @@ public class Main {
             System.out.println("Erro ao comprimir a base de dados: " + e.getMessage());
 
         }
-
+        reconstruirIndice();
     }
 
     private static void descomprimirBaseDeDados() {
@@ -532,7 +552,8 @@ public class Main {
         System.out.println("Digite a versão (1 ou 2): ");
         String versao = teclado.nextLine().trim();
         String arquivo = "Compressed/" + FILENAME + algoritmo + versao;
-
+        // Verifica se o arquivo comprimido existe
+        
         File compressedFile = new File(arquivo);
         if(!compressedFile.exists()) {
             System.out.println("Arquivo comprimido não encontrado.");
@@ -564,5 +585,7 @@ public class Main {
         } catch (IOException e) {
             System.out.println("Erro ao descomprimir a base de dados: " + e.getMessage());
         }
+        reconstruirIndice();
+
     }
 }

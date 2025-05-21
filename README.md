@@ -276,4 +276,3 @@ Ao escolher **12**, o sistema solicitará o algoritmo e a versão, e mostrará o
 
 ---
 
-Com a **Parte III**, o projeto se torna ainda mais completo, permitindo não só o gerenciamento eficiente dos dados, mas também a otimização do espaço em disco e o estudo prático de algoritmos de compressão.
