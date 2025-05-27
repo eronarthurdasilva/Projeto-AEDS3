@@ -1,64 +1,76 @@
 ==============================
- ROTEIRO DE TESTE CRUD INDEXADO
+ ROTEIRO DE TESTE CRUD INDEXADO (DETALHADO)
 ==============================
 
 1. [INICIALIZAÇÃO]
    a) Execute o programa.
-   b) Verifique se o menu principal aparece corretamente.
+   b) Verifique se o menu principal aparece corretamente, com todas as opções numeradas de 0 a 12.
 
 2. [CARREGAR BASE DE DADOS]
    a) Escolha a opção 1 para carregar o CSV.
-   b) Se a base já existir, o sistema deve avisar e não sobrescrever.
-   c) Se não existir, a base deve ser criada e o sistema deve informar sucesso.
+   b) Se a base já existir, o sistema deve exibir: "A base de dados já existe!" e não sobrescrever.
+   c) Se não existir, a base deve ser criada, os índices inicializados e o sistema deve exibir: "Dados carregados com sucesso!".
 
 3. [CREATE]
    a) Escolha a opção 2.
-   b) Insira valores válidos para amount e type.
-   c) O sistema deve criar a transação, mostrar o ID e os dados.
-   d) Repita para criar mais de um registro.
+   b) Exemplo de entrada:
+      - Transaction Amount: 150.75
+      - Transaction Type: "compra"
+      - (Preencha os demais campos conforme solicitado)
+   c) O sistema deve criar a transação, mostrar o novo ID (ex: "Transação criada com ID: 50001") e exibir os dados inseridos.
+   d) Repita para criar mais de um registro, usando valores diferentes.
+   e) Tente inserir valores inválidos (ex: letras em campos numéricos). O sistema deve pedir nova entrada sem travar.
 
 4. [READ]
    a) Escolha a opção 3.
-   b) Digite um ID existente. O sistema deve mostrar os dados da transação.
-   c) Digite um ID inexistente. O sistema deve informar "Transação não encontrada".
-   d) Digite um ID de uma transação deletada. O sistema deve informar "Transação deletada!".
+   b) Digite um ID existente (ex: 50001). O sistema deve mostrar todos os dados da transação.
+   c) Digite um ID inexistente (ex: 999999). O sistema deve exibir: "Transação não encontrada".
+   d) Digite um ID de uma transação deletada. O sistema deve exibir: "Transação deletada!".
 
 5. [UPDATE]
    a) Escolha a opção 4.
-   b) Digite um ID existente. Altere os campos e confirme se a atualização ocorre.
-   c) Digite um ID inexistente. O sistema deve informar "Transação não encontrada".
-   d) Digite um ID de uma transação deletada. O sistema deve informar "Transação deletada!".
+   b) Digite um ID existente (ex: 50001). Altere campos como "Transaction Amount" para 200.00 e confirme.
+   c) O sistema deve mostrar mensagem de sucesso e os dados atualizados.
+   d) Digite um ID inexistente. O sistema deve exibir: "Transação não encontrada".
+   e) Digite um ID de uma transação deletada. O sistema deve exibir: "Transação deletada!".
 
 6. [DELETE]
    a) Escolha a opção 5.
-   b) Digite um ID existente. O sistema deve marcar como deletado e informar sucesso.
-   c) Tente deletar o mesmo ID novamente. O sistema deve informar "Transação não encontrada".
+   b) Digite um ID existente (ex: 50001). O sistema deve marcar como deletado e exibir: "Transação deletada com sucesso".
+   c) Tente deletar o mesmo ID novamente. O sistema deve exibir: "Transação não encontrada".
 
 7. [CONSISTÊNCIA DOS ÍNDICES]
-   a) Troque o índice para Hash (opção 7).
+   a) Escolha a opção 7 para trocar o índice (ex: de B+ para Hash).
    b) Repita operações de create, read, update e delete e verifique se tudo funciona igual.
    c) Volte para B+ e repita.
+   d) Exemplo: Crie uma transação no índice Hash, leia e atualize-a, depois troque para B+ e leia novamente para garantir consistência.
 
 8. [VISUALIZAÇÃO DOS ÍNDICES]
    a) Escolha a opção 6 para imprimir a árvore B+.
+      - O sistema deve mostrar a estrutura da árvore e os IDs presentes.
    b) Escolha a opção 8 para imprimir o hash.
-   c) Confirme se os IDs aparecem nos índices conforme as operações realizadas.
+      - O sistema deve mostrar os buckets e os IDs presentes.
+   c) Confirme se os IDs aparecem nos índices conforme as operações realizadas (inclusive após deletes e updates).
 
 9. [RECONSTRUÇÃO DO ÍNDICE]
    a) Feche e reabra o programa.
    b) Use a opção 6 para reconstruir e imprimir a árvore B+.
-   c) Verifique se os dados e índices continuam corretos.
+   c) Verifique se os dados e índices continuam corretos, inclusive para registros criados, atualizados ou deletados anteriormente.
 
 10. [VALIDAÇÃO DE ENTRADAS]
-    a) Tente inserir valores inválidos (ex: letras em campos numéricos).
-    b) O sistema deve pedir nova entrada sem travar.
+    a) Tente inserir valores inválidos:
+       - Exemplo: Digite "abc" para Transaction Amount.
+       - Exemplo: Deixe campos obrigatórios em branco.
+    b) O sistema deve pedir nova entrada e não travar.
 
 11. [EXCEÇÕES]
-    a) Simule erros, como deletar um ID inexistente, atualizar um ID deletado, etc.
-    b) O sistema deve tratar e informar o erro sem encerrar abruptamente.
+    a) Simule erros:
+       - Delete um ID inexistente (ex: 999999).
+       - Atualize um ID deletado.
+    b) O sistema deve tratar e informar o erro sem encerrar abruptamente, exibindo mensagens claras.
 
 12. [DESEMPENHO]
-    a) Realize várias inserções e deleções.
-    b) O sistema deve continuar rápido e responsivo.
+    a) Realize várias inserções e deleções em sequência (ex: crie 100 registros, delete 50).
+    b) O sistema deve continuar rápido e responsivo, sem travamentos.
 
-=============================
+==============================

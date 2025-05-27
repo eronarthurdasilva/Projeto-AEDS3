@@ -178,10 +178,6 @@ Bucket 0 (profundidade 2): (1, 0) (5, 128) Bucket 1 (profundidade 2): (2, 32)
 
 ---
 
-### 📌 Conclusão
-
-Com a implementação da Árvore B+ e do Hashing Estendido, o sistema ficou robusto, eficiente e escalável, atendendo a diferentes tipos de consultas e operações. O usuário pode alternar entre os índices pelo menu, e todas as operações CRUD são otimizadas pelo índice selecionado, garantindo acesso rápido e seguro aos dados.
-
 ## Parte III
 ### 📌 Compressão de Dados na Base de Dados
 
@@ -253,18 +249,7 @@ Ao escolher **12**, o sistema solicitará o algoritmo e a versão, e mostrará o
 
 ### 📈 Como testar
 
-1. Realize operações CRUD normalmente.
-2. Escolha a opção de compressão para gerar arquivos comprimidos.
-3. Compare os resultados e escolha a melhor opção para seu caso.
-4. Use a opção de descompressão para restaurar o arquivo original.
-
----
-
-### 📚 O que você aprende com isso?
-
-- Como aplicar algoritmos clássicos de compressão em arquivos binários reais.
-- Como comparar desempenho e eficiência de algoritmos.
-- Como integrar novas funcionalidades a um sistema já existente de forma modular.
+Utikze dentro de Docs um arquivo chamado Test.txt, onde tera todas as informação e e até mesmos exemplos de como testar o código.
 
 ---
 
@@ -276,3 +261,10 @@ Ao escolher **12**, o sistema solicitará o algoritmo e a versão, e mostrará o
 
 ---
 
+### Autor 
+Desenvolvido por:
+**Eron Arthur da silva**
+
+### Consideração final 
+
+Este projeto foi desenvolvido como parte da disciplina de Algoritmos e Estruturas de Dados III, sob orientação do Prof, testes e documentação são de minha autoria, salvo indicações em comentários ou referências bibliográficas, e mais alguns prompts usados para entendimento e aplicação no debug, correção de erros e atualização do código.

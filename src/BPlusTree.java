@@ -180,24 +180,36 @@ public class BPlusTree {
     
         BPlusNode newNode = new BPlusNode(node.isLeaf);
         newNode.keys.addAll(node.keys.subList(midIndex + 1, node.keys.size()));
-        newNode.values.addAll(node.values.subList(midIndex + 1, node.values.size()));
+        if (node.isLeaf) {
+            newNode.values.addAll(node.values.subList(midIndex + 1, node.values.size()));
+        }
     
         if (!node.isLeaf) {
             newNode.children.addAll(node.children.subList(midIndex + 1, node.children.size()));
+            for (BPlusNode child : newNode.children) {
+                child.parent = newNode;
+            }
             node.children.subList(midIndex + 1, node.children.size()).clear();
         }
     
         node.keys.subList(midIndex, node.keys.size()).clear();
-        node.values.subList(midIndex, node.values.size()).clear();
+        if (node.isLeaf) {
+            node.values.subList(midIndex, node.values.size()).clear();
+        }
     
         if (node == root) {
             BPlusNode newRoot = new BPlusNode(false);
             newRoot.keys.add(midKey);
             newRoot.children.add(node);
             newRoot.children.add(newNode);
+            node.parent = newRoot;
+            newNode.parent = newRoot;
             root = newRoot;
         } else {
             BPlusNode parent = node.parent;
+            if (parent == null) {
+                throw new IllegalStateException("Parent is null during split, but node is not root!");
+            }
             int insertPosition = 0;
             while (insertPosition < parent.keys.size() && midKey > parent.keys.get(insertPosition)) {
                 insertPosition++;
@@ -210,8 +222,14 @@ public class BPlusTree {
                 split(parent);
             }
         }
-    }
     
+        // Se for folha, atualiza ponteiro next
+        if (node.isLeaf) {
+            newNode.next = node.next;
+            node.next = newNode;
+        }
+    }
+
     private void reequilibrar(BPlusNode node) {
         BPlusNode parent = node.parent;
         if (parent == null) {

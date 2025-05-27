@@ -149,6 +149,10 @@ public class Main {
             while ((linha = br.readLine()) != null) {
                 try {
                     String[] campos = linha.split(",");
+                    if (campos.length != 21) {
+                        System.out.println("Linha ignorada (campos insuficientes): " + linha);
+                        continue;
+                    }
                     Transaction txn = new Transaction(
                             Integer.parseInt(campos[0].substring(4)), // Transaction_ID sem o "TXN_"
                             campos[1], // User_ID
@@ -250,9 +254,7 @@ public class Main {
         System.out.println("\n==============================");
         System.out.println("       LER TRANSAÇÃO");
         System.out.println("==============================");
-        System.out.print("Digite o ID da transação: ");
-        int id = teclado.nextInt();
-        teclado.nextLine();
+        int id = getValidInt("Digite o Transaction ID a ser lido: ");
     
         // Busca a posição no índice selecionado
         Long posicao;
