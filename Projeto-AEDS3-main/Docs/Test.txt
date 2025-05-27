@@ -1,0 +1,64 @@
+==============================
+ ROTEIRO DE TESTE CRUD INDEXADO
+==============================
+
+1. [INICIALIZAÇÃO]
+   a) Execute o programa.
+   b) Verifique se o menu principal aparece corretamente.
+
+2. [CARREGAR BASE DE DADOS]
+   a) Escolha a opção 1 para carregar o CSV.
+   b) Se a base já existir, o sistema deve avisar e não sobrescrever.
+   c) Se não existir, a base deve ser criada e o sistema deve informar sucesso.
+
+3. [CREATE]
+   a) Escolha a opção 2.
+   b) Insira valores válidos para amount e type.
+   c) O sistema deve criar a transação, mostrar o ID e os dados.
+   d) Repita para criar mais de um registro.
+
+4. [READ]
+   a) Escolha a opção 3.
+   b) Digite um ID existente. O sistema deve mostrar os dados da transação.
+   c) Digite um ID inexistente. O sistema deve informar "Transação não encontrada".
+   d) Digite um ID de uma transação deletada. O sistema deve informar "Transação deletada!".
+
+5. [UPDATE]
+   a) Escolha a opção 4.
+   b) Digite um ID existente. Altere os campos e confirme se a atualização ocorre.
+   c) Digite um ID inexistente. O sistema deve informar "Transação não encontrada".
+   d) Digite um ID de uma transação deletada. O sistema deve informar "Transação deletada!".
+
+6. [DELETE]
+   a) Escolha a opção 5.
+   b) Digite um ID existente. O sistema deve marcar como deletado e informar sucesso.
+   c) Tente deletar o mesmo ID novamente. O sistema deve informar "Transação não encontrada".
+
+7. [CONSISTÊNCIA DOS ÍNDICES]
+   a) Troque o índice para Hash (opção 7).
+   b) Repita operações de create, read, update e delete e verifique se tudo funciona igual.
+   c) Volte para B+ e repita.
+
+8. [VISUALIZAÇÃO DOS ÍNDICES]
+   a) Escolha a opção 6 para imprimir a árvore B+.
+   b) Escolha a opção 8 para imprimir o hash.
+   c) Confirme se os IDs aparecem nos índices conforme as operações realizadas.
+
+9. [RECONSTRUÇÃO DO ÍNDICE]
+   a) Feche e reabra o programa.
+   b) Use a opção 6 para reconstruir e imprimir a árvore B+.
+   c) Verifique se os dados e índices continuam corretos.
+
+10. [VALIDAÇÃO DE ENTRADAS]
+    a) Tente inserir valores inválidos (ex: letras em campos numéricos).
+    b) O sistema deve pedir nova entrada sem travar.
+
+11. [EXCEÇÕES]
+    a) Simule erros, como deletar um ID inexistente, atualizar um ID deletado, etc.
+    b) O sistema deve tratar e informar o erro sem encerrar abruptamente.
+
+12. [DESEMPENHO]
+    a) Realize várias inserções e deleções.
+    b) O sistema deve continuar rápido e responsivo.
+
+=============================
