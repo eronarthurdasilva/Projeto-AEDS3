@@ -174,7 +174,8 @@ public class Main {
                             campos[17], // Authentication_Method
                             Float.parseFloat(campos[18]), // Risk_Score
                             campos[19].equals("1"), // Is_Weekend
-                            campos[20].equals("1") // Fraud_Label
+                            campos[20].equals("1"), // Fraud_Label
+                            new String[0] // tags vazias
                     );
 
                     // Serializa a transação e grava no arquivo
@@ -225,10 +226,17 @@ public class Main {
             float transactionAmount = getValidFloat();
             System.out.print("Transaction Type: ");
             String transactionType = teclado.nextLine();
+            System.out.print("Quantas tags deseja adicionar? ");
+            int numTags = getValidInt("");
+            String[] tags = new String[numTags];
+            for (int i = 0; i < numTags; i++) {
+                System.out.print("Tag " + (i+1) + ": ");
+                tags[i] = teclado.nextLine();
+            }
 
-            Transaction txn = new Transaction(count + 1, // ID gerado automaticamente
-                    userID, transactionAmount, transactionType, new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()), // Data gerada automaticamente
-                    0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false);
+            Transaction txn = new Transaction(count + 1, userID, transactionAmount, transactionType, 
+                new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()), 
+                0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false, tags);    
 
             byte[] data = txn.toByteArray();
             long posicaoRegistro = raf.getFilePointer();
@@ -323,7 +331,7 @@ public class Main {
             System.out.print("Novo Transaction Type: ");
             String newType = teclado.nextLine();
     
-            Transaction txTransaction = new Transaction(id, "", newAmount, newType, "", 0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false);
+            Transaction txTransaction = new Transaction(id, "", newAmount, newType, "", 0, "", "", "", false, 0, 0, 0, 0, "", 0, 0, "", 0, false, false, new String[0]);
             byte[] dataAtualizado = txTransaction.toByteArray();
             raf.seek(posicao);
             raf.writeBoolean(true);

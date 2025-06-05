@@ -5,6 +5,34 @@
 
 Este projeto implementa um sistema CRUD (**Create, Read, Update, Delete**) aplicadas em um arquivo CSV, a que utilizei foi dados de transações bancarias, armazenando as informações em um **arquivo binário** e permite operações eficientes de criação, leitura, atualização e exclusão de registros.
 
+#### **Tipos de Dados Atendidos**
+- **ID do registro**: campo `transactionID` (int), gerenciado automaticamente e salvo no cabeçalho do arquivo.
+- **String de tamanho variável**: vários campos, como `userID`, `transactionType`, etc.
+- **Data**: campo `timestamp` (String, formato "yyyy-MM-dd HH:mm:ss").
+- **Lista de valores String com indicador de quantidade**: campo `tags` (array de String) e `numTags` (int), preenchidos pelo usuário.
+- **Tipo numérico**: diversos campos float/int, como `transactionAmount`, `accountBalance`, etc.
+
+
+#### **Estrutura do Arquivo**
+- **Cabeçalho**: int que armazena o último valor de ID utilizado.
+- **Registros**:
+  - **Lápide**: byte que indica se o registro é válido ou excluído.
+  - **Indicador de tamanho**: int que indica o tamanho do vetor de bytes.
+  - **Vetor de bytes**: bytes que descrevem o objeto, incluindo todos os campos e a lista de tags.
+
+#### **Funcionalidades**
+- **Carga da base de dados**: importação de arquivo CSV.
+- **CRUD**:
+  - **Create**: criação de registro, incluindo preenchimento de lista de tags.
+  - **Read**: leitura de registro por ID.
+  - **Read conjunto**: leitura de múltiplos registros por IDs informados.
+  - **Update**: atualização de registro.
+  - **Delete**: marcação de registro como excluído (lápide).
+
+#### **Exemplo de uso da lista de tags**
+Ao criar ou atualizar um registro, o usuário informa quantas tags deseja adicionar e digita cada uma delas.  
+Essas tags são armazenadas junto ao registro e exibidas na leitura.
+
 ## **📂 Estrutura do Projeto**
 
 O projeto é composto por duas classes principais:
@@ -249,7 +277,7 @@ Ao escolher **12**, o sistema solicitará o algoritmo e a versão, e mostrará o
 
 ### 📈 Como testar
 
-Utikze dentro de Docs um arquivo chamado Test.txt, onde tera todas as informação e e até mesmos exemplos de como testar o código.
+Utilize dentro de Docs um arquivo chamado Test.txt, onde tera todas as informação e e até mesmos exemplos de como testar o código.
 
 ---
 

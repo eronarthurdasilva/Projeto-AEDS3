@@ -5,6 +5,7 @@
 
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 class Transaction {
     // Declaração de variáveis
@@ -29,9 +30,10 @@ class Transaction {
     protected float riskScore; // Pontuação de risco da transação
     protected boolean isWeekend; // Indicador se a transação ocorreu no fim de semana
     protected boolean fraudLabel; // Indicador se a transação é fraudulenta
+    protected String[] tags; // Tags associadas à transação
 
     // Construtor da classe Transaction
-    public Transaction(int transactionID, String userID, float transactionAmount, String transactionType, String timestamp, float accountBalance, String deviceType, String location, String merchantCategory, boolean ipAddressFlag, int previousFraudulentActivity, int dailyTransactionCount, float avgTransactionAmount7d, int failedTransactionCount7d, String cardType, int cardAge, float transactionDistance, String authenticationMethod, float riskScore, boolean isWeekend, boolean fraudLabel) {
+    public Transaction(int transactionID, String userID, float transactionAmount, String transactionType, String timestamp, float accountBalance, String deviceType, String location, String merchantCategory, boolean ipAddressFlag, int previousFraudulentActivity, int dailyTransactionCount, float avgTransactionAmount7d, int failedTransactionCount7d, String cardType, int cardAge, float transactionDistance, String authenticationMethod, float riskScore, boolean isWeekend, boolean fraudLabel, String[] tags) {
         this.transactionID = transactionID;
         this.userID = userID;
         this.transactionAmount = transactionAmount;
@@ -53,8 +55,8 @@ class Transaction {
         this.riskScore = riskScore;
         this.isWeekend = isWeekend;
         this.fraudLabel = fraudLabel;
+        this.tags = tags != null ? tags : new String[0]; // Evita NullPointerException se tags for nulo
     }
-
     // Construtor vazio
     public Transaction() {
         this.transactionID = -1;
@@ -78,6 +80,7 @@ class Transaction {
         this.riskScore = 0F;
         this.isWeekend = false;
         this.fraudLabel = false;
+        this.tags = new String[0];
     }
 
     // Método para imprimir os dados da transação
@@ -103,7 +106,8 @@ class Transaction {
                 "Authentication Method: " + this.authenticationMethod + "\n" +
                 "Risk Score: " + this.riskScore + "\n" +
                 "Is Weekend: " + this.isWeekend + "\n" +
-                "Fraud Label: " + this.fraudLabel + "\n";
+                "Fraud Label: " + this.fraudLabel + "\n"
+                + "Tags: " + Arrays.toString(this.tags) + "\n";
     }
 
     // Método para converter objeto em array de bytes
@@ -146,6 +150,11 @@ class Transaction {
         // Escrevemos os dados da transação
         finalDos.write(transactionData);
 
+        dos.writeInt(tags.length); // quantidade de tags
+        for (String tag : tags) {
+            dos.writeInt(tag.length()); // tamanho da string
+            dos.writeUTF(tag);         // valor da string
+        }
         return finalBaos.toByteArray();
     }
 
@@ -185,11 +194,17 @@ class Transaction {
         boolean isWeekend = transactionDis.readBoolean();
         boolean fraudLabel = transactionDis.readBoolean();
 
+        int numTags = dis.readInt();
+        String[] tags = new String[numTags];
+        for (int i = 0; i < numTags; i++) {
+            int tagLen = dis.readInt(); // lê o tamanho da string (pode ser usado para debug)
+            tags[i] = dis.readUTF();
+        }
         // Retorna um novo objeto Transaction
         return new Transaction(transactionID, userID, transactionAmount, transactionType, timestamp,
-                accountBalance, deviceType, location, merchantCategory, ipAddressFlag, previousFraudulentActivity,
-                dailyTransactionCount, avgTransactionAmount7d, failedTransactionCount7d, cardType, cardAge,
-                transactionDistance, authenticationMethod, riskScore, isWeekend, fraudLabel);
+        accountBalance, deviceType, location, merchantCategory, ipAddressFlag, previousFraudulentActivity,
+        dailyTransactionCount, avgTransactionAmount7d, failedTransactionCount7d, cardType, cardAge,
+        transactionDistance, authenticationMethod, riskScore, isWeekend, fraudLabel, tags);
     }
 
 }
