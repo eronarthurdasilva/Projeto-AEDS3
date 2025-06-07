@@ -3,7 +3,7 @@
 ## Parte I
 ### **📌 Descrição do Projeto**
 
-Este projeto implementa um sistema CRUD (**Create, Read, Update, Delete**) aplicadas em um arquivo CSV, a que utilizei foi dados de transações bancarias, armazenando as informações em um **arquivo binário** e permite operações eficientes de criação, leitura, atualização e exclusão de registros.
+Este projeto implementa um sistema CRUD (**Create, Read, Update, Delete**) aplicadas em um arquivo CSV, utilizando dados de transações bancárias, armazenando as informações em um **arquivo binário** e permitindo operações eficientes de criação, leitura, atualização e exclusão de registros.
 
 #### **Tipos de Dados Atendidos**
 - **ID do registro**: campo `transactionID` (int), gerenciado automaticamente e salvo no cabeçalho do arquivo.
@@ -11,7 +11,6 @@ Este projeto implementa um sistema CRUD (**Create, Read, Update, Delete**) aplic
 - **Data**: campo `timestamp` (String, formato "yyyy-MM-dd HH:mm:ss").
 - **Lista de valores String com indicador de quantidade**: campo `tags` (array de String) e `numTags` (int), preenchidos pelo usuário.
 - **Tipo numérico**: diversos campos float/int, como `transactionAmount`, `accountBalance`, etc.
-
 
 #### **Estrutura do Arquivo**
 - **Cabeçalho**: int que armazena o último valor de ID utilizado.
@@ -105,33 +104,12 @@ A classe `Main` gerencia o fluxo do programa e implementa as operações CRUD.
   - `update()`: Atualiza um registro existente.
   - `delete()`: Marca um registro como excluído.
 
-## **🛠️ Estratégia de Implementação**
-
-1. **Leitura do CSV**:
-     - O método `carregarCSV` processa o arquivo CSV, cria objetos `Transaction` e os armazena no arquivo binário.
-
-2. **Criação de Transações**:
-     - O método `create` solicita os dados ao usuário, cria um objeto `Transaction` e o serializa no arquivo binário.
-
-3. **Leitura de Transações**:
-     - O método `read` busca um registro pelo ID, desserializa os dados e os exibe ao usuário.
-
-4. **Atualização de Transações**:
-     - O método `update` permite modificar os dados de um registro existente e atualizá-lo no arquivo binário.
-
-5. **Exclusão de Transações**:
-     - O método `delete` marca um registro como excluído, sem removê-lo fisicamente do arquivo.
-
 ## **📈 Melhorias Futuras**
 
 - 📌 **Implementar uma Interface Gráfica (GUI)** para tornar a interação mais amigável.
 - 📌 **Adição de Validações Mais Robustas** para entrada de dados.
 - 📌 **Integração com um Banco de Dados Relacional (ex.: PostgreSQL, MySQL)** para maior escalabilidade.
 - 📌 **Incorporar Algoritmos de Detecção de Fraudes** para análise em tempo real.
-
-## **📌 Conclusão**
-
-Este projeto demonstra a implementação de um **CRUD robusto**, além de aprender o funcionamento de um banco de dados, para gerenciamento de uma base de dados utilizada, utilizando **arquivos binários** para armazenamento persistente. A modularidade do código facilita a **manutenção e expansão futura**, permitindo a adição de novas funcionalidades conforme necessário.
 
 ## Parte II
 ### 📌 Manipulação Indexada da Base de Dados
@@ -288,6 +266,8 @@ Utilize dentro de Docs um arquivo chamado Test.txt, onde tera todas as informaç
 - O sistema está preparado para ser expandido com novos algoritmos de compressão no futuro.
 
 ---
+## Parte 4 - FINAL
+
 
 ### Autor 
 Desenvolvido por:

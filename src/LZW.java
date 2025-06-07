@@ -47,21 +47,27 @@ public class LZW {
             int code = ((input[i] & 0xFF) << 8) | (input[i+1] & 0xFF);
             codes.add(code);
         }
-        Map<Integer, String> dict = new HashMap<>();
-        for (int i = 0; i < 256; i++) dict.put(i, "" + (char)i);
-        String w = "" + (char)(int)codes.get(0);
-        StringBuilder result = new StringBuilder(w);
+        Map<Integer, byte[]> dict = new HashMap<>();
+        for (int i = 0; i < 256; i++) dict.put(i, new byte[]{(byte)i});
+        byte[] w = dict.get(codes.get(0));
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        result.write(w, 0, w.length);
         int dictSize = 256;
         for (int i = 1; i < codes.size(); i++) {
             int k = codes.get(i);
-            String entry;
+            byte[] entry;
             if (dict.containsKey(k)) entry = dict.get(k);
-            else if (k == dictSize) entry = w + w.charAt(0);
-            else throw new IllegalArgumentException("Bad LZW code: " + k);
-            result.append(entry);
-            dict.put(dictSize++, w + entry.charAt(0));
+            else if (k == dictSize) {
+                byte[] newEntry = Arrays.copyOf(w, w.length + 1);
+                newEntry[w.length] = w[0];
+                entry = newEntry;
+            } else throw new IllegalArgumentException("Bad LZW code: " + k);
+            result.write(entry, 0, entry.length);
+            byte[] newEntry = Arrays.copyOf(w, w.length + 1);
+            newEntry[w.length] = entry[0];
+            dict.put(dictSize++, newEntry);
             w = entry;
         }
-        return result.toString().getBytes();
+        return result.toByteArray();
     }
 }

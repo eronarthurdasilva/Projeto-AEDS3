@@ -1,6 +1,5 @@
 /*
  * Projeto AEDs 1 - Implementação do crud de transações
- * 
  */
 
 import java.io.*;
@@ -9,30 +8,30 @@ import java.util.Arrays;
 
 class Transaction {
     // Declaração de variáveis
-    protected int transactionID; // ID da transação
-    protected String userID; // ID do usuário
-    protected float transactionAmount; // Valor da transação
-    protected String transactionType; // Tipo de transação
-    protected String timestamp; // Data e hora da transação
-    protected float accountBalance; // Saldo da conta após a transação
-    protected String deviceType; // Tipo de dispositivo usado na transação
-    protected String location; // Localização da transação
-    protected String merchantCategory; // Categoria do comerciante
-    protected boolean ipAddressFlag; // Indicador de IP suspeito
-    protected int previousFraudulentActivity; // Número de atividades fraudulentas anteriores
-    protected int dailyTransactionCount; // Contagem diária de transações
-    protected float avgTransactionAmount7d; // Valor médio das transações nos últimos 7 dias
-    protected int failedTransactionCount7d; // Contagem de transações falhadas nos últimos 7 dias
-    protected String cardType; // Tipo de cartão usado na transação
-    protected int cardAge; // Idade do cartão em meses
-    protected float transactionDistance; // Distância entre o local da transação e o endereço do usuário
-    protected String authenticationMethod; // Método de autenticação usado
-    protected float riskScore; // Pontuação de risco da transação
-    protected boolean isWeekend; // Indicador se a transação ocorreu no fim de semana
-    protected boolean fraudLabel; // Indicador se a transação é fraudulenta
-    protected String[] tags; // Tags associadas à transação
+    protected int transactionID;
+    protected String userID;
+    protected float transactionAmount;
+    protected String transactionType;
+    protected String timestamp;
+    protected float accountBalance;
+    protected String deviceType;
+    protected String location;
+    protected String merchantCategory;
+    protected boolean ipAddressFlag;
+    protected int previousFraudulentActivity;
+    protected int dailyTransactionCount;
+    protected float avgTransactionAmount7d;
+    protected int failedTransactionCount7d;
+    protected String cardType;
+    protected int cardAge;
+    protected float transactionDistance;
+    protected String authenticationMethod;
+    protected float riskScore;
+    protected boolean isWeekend;
+    protected boolean fraudLabel;
+    protected String[] tags;
 
-    // Construtor da classe Transaction
+    // Construtor completo
     public Transaction(int transactionID, String userID, float transactionAmount, String transactionType, String timestamp, float accountBalance, String deviceType, String location, String merchantCategory, boolean ipAddressFlag, int previousFraudulentActivity, int dailyTransactionCount, float avgTransactionAmount7d, int failedTransactionCount7d, String cardType, int cardAge, float transactionDistance, String authenticationMethod, float riskScore, boolean isWeekend, boolean fraudLabel, String[] tags) {
         this.transactionID = transactionID;
         this.userID = userID;
@@ -55,32 +54,12 @@ class Transaction {
         this.riskScore = riskScore;
         this.isWeekend = isWeekend;
         this.fraudLabel = fraudLabel;
-        this.tags = tags != null ? tags : new String[0]; // Evita NullPointerException se tags for nulo
+        this.tags = tags != null ? tags : new String[0];
     }
+
     // Construtor vazio
     public Transaction() {
-        this.transactionID = -1;
-        this.userID = "";
-        this.transactionAmount = 0F;
-        this.transactionType = "";
-        this.timestamp = "";
-        this.accountBalance = 0F;
-        this.deviceType = "";
-        this.location = "";
-        this.merchantCategory = "";
-        this.ipAddressFlag = false;
-        this.previousFraudulentActivity = 0;
-        this.dailyTransactionCount = 0;
-        this.avgTransactionAmount7d = 0F;
-        this.failedTransactionCount7d = 0;
-        this.cardType = "";
-        this.cardAge = 0;
-        this.transactionDistance = 0F;
-        this.authenticationMethod = "";
-        this.riskScore = 0F;
-        this.isWeekend = false;
-        this.fraudLabel = false;
-        this.tags = new String[0];
+        this(-1, "", 0F, "", "", 0F, "", "", "", false, 0, 0, 0F, 0, "", 0, 0F, "", 0F, false, false, new String[0]);
     }
 
     // Método para imprimir os dados da transação
@@ -115,7 +94,7 @@ class Transaction {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
-        // Escrevemos primeiro os dados normalmente
+        // Escreve todos os campos
         dos.writeInt(transactionID);
         dos.writeUTF(userID);
         dos.writeFloat(transactionAmount);
@@ -138,24 +117,13 @@ class Transaction {
         dos.writeBoolean(isWeekend);
         dos.writeBoolean(fraudLabel);
 
-        // Pegamos os bytes da transação
-        byte[] transactionData = baos.toByteArray();
-
-        // Criamos um novo array que inclui o tamanho do registro no início
-        ByteArrayOutputStream finalBaos = new ByteArrayOutputStream();
-        DataOutputStream finalDos = new DataOutputStream(finalBaos);
-
-        // Escrevemos o tamanho do registro
-        finalDos.writeInt(transactionData.length);
-        // Escrevemos os dados da transação
-        finalDos.write(transactionData);
-
-        dos.writeInt(tags.length); // quantidade de tags
+        // Escreve as tags
+        dos.writeInt(tags.length);
         for (String tag : tags) {
-            dos.writeInt(tag.length()); // tamanho da string
-            dos.writeUTF(tag);         // valor da string
+            dos.writeUTF(tag);
         }
-        return finalBaos.toByteArray();
+
+        return baos.toByteArray();
     }
 
     // Método para reconstruir objeto a partir de um array de bytes
@@ -163,48 +131,37 @@ class Transaction {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream dis = new DataInputStream(bais);
 
-        // Lê o tamanho do registro
-        int tamanho = dis.readInt();
-        byte[] transactionData = new byte[tamanho];
-        dis.readFully(transactionData);
-
-        ByteArrayInputStream transactionBais = new ByteArrayInputStream(transactionData);
-        DataInputStream transactionDis = new DataInputStream(transactionBais);
-
-        // Lê os dados do DataInputStream
-        int transactionID = transactionDis.readInt();
-        String userID = transactionDis.readUTF();
-        float transactionAmount = transactionDis.readFloat();
-        String transactionType = transactionDis.readUTF();
-        String timestamp = transactionDis.readUTF();
-        float accountBalance = transactionDis.readFloat();
-        String deviceType = transactionDis.readUTF();
-        String location = transactionDis.readUTF();
-        String merchantCategory = transactionDis.readUTF();
-        boolean ipAddressFlag = transactionDis.readBoolean();
-        int previousFraudulentActivity = transactionDis.readInt();
-        int dailyTransactionCount = transactionDis.readInt();
-        float avgTransactionAmount7d = transactionDis.readFloat();
-        int failedTransactionCount7d = transactionDis.readInt();
-        String cardType = transactionDis.readUTF();
-        int cardAge = transactionDis.readInt();
-        float transactionDistance = transactionDis.readFloat();
-        String authenticationMethod = transactionDis.readUTF();
-        float riskScore = transactionDis.readFloat();
-        boolean isWeekend = transactionDis.readBoolean();
-        boolean fraudLabel = transactionDis.readBoolean();
+        int transactionID = dis.readInt();
+        String userID = dis.readUTF();
+        float transactionAmount = dis.readFloat();
+        String transactionType = dis.readUTF();
+        String timestamp = dis.readUTF();
+        float accountBalance = dis.readFloat();
+        String deviceType = dis.readUTF();
+        String location = dis.readUTF();
+        String merchantCategory = dis.readUTF();
+        boolean ipAddressFlag = dis.readBoolean();
+        int previousFraudulentActivity = dis.readInt();
+        int dailyTransactionCount = dis.readInt();
+        float avgTransactionAmount7d = dis.readFloat();
+        int failedTransactionCount7d = dis.readInt();
+        String cardType = dis.readUTF();
+        int cardAge = dis.readInt();
+        float transactionDistance = dis.readFloat();
+        String authenticationMethod = dis.readUTF();
+        float riskScore = dis.readFloat();
+        boolean isWeekend = dis.readBoolean();
+        boolean fraudLabel = dis.readBoolean();
 
         int numTags = dis.readInt();
         String[] tags = new String[numTags];
         for (int i = 0; i < numTags; i++) {
-            int tagLen = dis.readInt(); // lê o tamanho da string (pode ser usado para debug)
             tags[i] = dis.readUTF();
         }
-        // Retorna um novo objeto Transaction
-        return new Transaction(transactionID, userID, transactionAmount, transactionType, timestamp,
-        accountBalance, deviceType, location, merchantCategory, ipAddressFlag, previousFraudulentActivity,
-        dailyTransactionCount, avgTransactionAmount7d, failedTransactionCount7d, cardType, cardAge,
-        transactionDistance, authenticationMethod, riskScore, isWeekend, fraudLabel, tags);
-    }
 
+        return new Transaction(transactionID, userID, transactionAmount, transactionType, timestamp,
+            accountBalance, deviceType, location, merchantCategory, ipAddressFlag, previousFraudulentActivity,
+            dailyTransactionCount, avgTransactionAmount7d, failedTransactionCount7d, cardType, cardAge,
+            transactionDistance, authenticationMethod, riskScore, isWeekend, fraudLabel, tags);
+    }
 }

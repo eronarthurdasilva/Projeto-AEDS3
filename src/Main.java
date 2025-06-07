@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.nio.file.*;
 
 public class Main {
     private static final String FILENAME = "transactions.db";
@@ -13,7 +14,8 @@ public class Main {
     public static void main(String[] args) {
         if (baseDeDadosExiste()) {
             System.out.println("Reconstruindo índices a partir do arquivo existente...");
-            reconstruirIndice();
+            reconstruirBPlus();
+            reconstruirHash();
             
         } else {
             System.out.println("Arquivo de base de dados não encontrado. Carregue o CSV para criar o arquivo.");
@@ -36,6 +38,8 @@ public class Main {
             System.out.println("10 - Debug Hash Extendível");
             System.out.println("11 - Comprimir base de dados");
             System.out.println("12 - Descomprimir base de dados");
+            System.out.println("13 - Reconstruir índice B+");
+            System.out.println("14 - Reconstruir índice Hash");
             System.out.println("0 - Sair");
             System.out.print("Digite a opção desejada: ");
             opcao = teclado.nextInt();
@@ -69,9 +73,7 @@ public class Main {
                     delete();
                     break;
                 case 6:
-                    reconstruirIndice();
-                    System.out.println("Estrutura da Árvore B+:");
-                    indexManager.printIndexTree();
+                    imprimirBPlus();
                     break;
 
                 case 7:
@@ -83,11 +85,10 @@ public class Main {
                         System.out.println("Índice alterado para Árvore B+.");
                     }
                     reconstruirIndice();
-                    System.out.println("Estrutura do índice " + indiceAtual + ":");
                     break;
                 
                 case 8:
-                    hashIndex.printHash();
+                    imprimirHash();
                     break;
 
                 case 9:
@@ -111,6 +112,13 @@ public class Main {
                     break;
                 case 12:
                     descomprimirBaseDeDados();
+                    break;
+
+                case 13:
+                    reconstruirBPlus();
+                    break;
+                case 14:
+                    reconstruirHash();
                     break;
                 case 0:
                     // Sai do programa
@@ -200,6 +208,8 @@ public class Main {
         } catch (IOException e) {
             System.out.println("Erro ao carregar CSV: " + e.getMessage());
         }
+        reconstruirIndice();
+        System.out.println("Índices reconstruídos com sucesso!");
     }
 
     // Método para criar um novo registro no arquivo binário
@@ -417,46 +427,129 @@ public class Main {
     /*
      * Método para reconstruir o índice B+ ou Hash Extendível
      */
-    private static void reconstruirIndice() {
-        if (indiceAtual.equals("BPLUS")) {
-            indexManager = new IndexManager(4); // Limpa o índice atual
+    
+
+     private static void reconstruirBPlus() {
+        try {
+            File f = new File(FILENAME);
+            if (!f.exists() || f.length() < 16) {
+                System.out.println("Arquivo de dados não encontrado ou muito pequeno para reconstruir índice.");
+                return;
+            }
+            indexManager = new IndexManager(4);
             try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
+                int registro = 0;
                 while (raf.getFilePointer() < raf.length()) {
                     long posicao = raf.getFilePointer();
                     boolean lapide = raf.readBoolean();
                     int tamanho = raf.readInt();
+                    System.out.printf("Registro %d | Posição: %d | Lápide: %b | Tamanho: %d\n", registro, posicao,
+                            lapide, tamanho);
+                    if (tamanho <= 0 || tamanho > raf.length()) {
+                        System.out.println("Arquivo de dados corrompido ou não está no formato esperado.");
+                        return;
+                    }
                     byte[] data = new byte[tamanho];
                     raf.read(data);
                     if (lapide) {
-                        Transaction txn = Transaction.fromByteArray(data);
-                        System.out.println("Inserindo no índice B+: ID = " + txn.transactionID + ", Posição = " + posicao);
+                        Transaction txn = null;
+                        try {
+                            txn = Transaction.fromByteArray(data);
+                        } catch (Exception ex) {
+                            System.out.println("Erro ao desserializar Transaction no registro " + registro + ": " + ex);
+                            ex.printStackTrace();
+                            return;
+                        }
+                        if (txn == null) {
+                            System.out.println("Erro: Transaction desserializada como null no registro " + registro);
+                            return;
+                        }
                         indexManager.insert(txn.transactionID, posicao);
                     }
+                    registro++;
                 }
-            } catch (IOException e) {
-                System.out.println("Erro ao reconstruir índice B+: " + e.getMessage());
             }
-        } else if (indiceAtual.equals("HASH")) {
-            hashIndex = new ExtendibleHash(2, 4); // Limpa o índice atual
-            try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
-                while (raf.getFilePointer() < raf.length()) {
-                    long posicao = raf.getFilePointer();
-                    boolean lapide = raf.readBoolean();
-                    int tamanho = raf.readInt();
-                    byte[] data = new byte[tamanho];
-                    raf.read(data);
-                    if (lapide) {
-                        Transaction txn = Transaction.fromByteArray(data);
-                        System.out.println("Inserindo no índice Hash: " + txn.transactionID + " na posição " + posicao);
-                        hashIndex.insert(txn.transactionID, posicao);
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("Erro ao reconstruir índice Hash: " + e.getMessage());
-            }
+            System.out.println("Árvore B+ reconstruída com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao reconstruir Árvore B+: " + e);
+            e.printStackTrace();
         }
     }
 
+    private static void reconstruirHash() {
+        try {
+            File f = new File(FILENAME);
+            if (!f.exists() || f.length() < 16) {
+                System.out.println("Arquivo de dados não encontrado ou muito pequeno para reconstruir índice.");
+                return;
+            }
+            hashIndex = new ExtendibleHash(2, 4);
+            try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
+                int registro = 0;
+                while (raf.getFilePointer() < raf.length()) {
+                    long posicao = raf.getFilePointer();
+                    boolean lapide = raf.readBoolean();
+                    int tamanho = raf.readInt();
+                    System.out.printf("Registro %d | Posição: %d | Lápide: %b | Tamanho: %d\n", registro, posicao,
+                            lapide, tamanho);
+                    if (tamanho <= 0 || tamanho > raf.length()) {
+                        System.out.println("Arquivo de dados corrompido ou não está no formato esperado.");
+                        return;
+                    }
+                    byte[] data = new byte[tamanho];
+                    raf.read(data);
+                    if (lapide) {
+                        Transaction txn = null;
+                        try {
+                            txn = Transaction.fromByteArray(data);
+                        } catch (Exception ex) {
+                            System.out.println("Erro ao desserializar Transaction no registro " + registro + ": " + ex);
+                            ex.printStackTrace();
+                            return;
+                        }
+                        if (txn == null) {
+                            System.out.println("Erro: Transaction desserializada como null no registro " + registro);
+                            return;
+                        }
+                        hashIndex.insert(txn.transactionID, posicao);
+                    }
+                    registro++;
+                }
+            }
+            System.out.println("Hash Extendível reconstruído com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao reconstruir Hash Extendível: " + e);
+            e.printStackTrace();
+        }
+    }
+    
+    private static void reconstruirIndice() {
+        if (indiceAtual.equals("BPLUS")) {
+            reconstruirBPlus();
+        } else if (indiceAtual.equals("HASH")) {
+            reconstruirHash();
+        }
+    }
+
+    // Imprime a Árvore B+ se existir
+    private static void imprimirBPlus() {
+        if (indexManager != null) {
+            System.out.println("Estrutura da Árvore B+:");
+            indexManager.printIndexTree();
+        } else {
+            System.out.println("Árvore B+ não foi inicializada.");
+        }
+    }
+
+    // Imprime o Hash Extendível se existir
+    private static void imprimirHash() {
+        if (hashIndex != null) {
+            System.out.println("Estrutura do Hash Extendível:");
+            hashIndex.printHash();
+        } else {
+            System.out.println("Hash Extendível não foi inicializado.");
+        }
+    }
     private static void verificarConsistencia() {
         reconstruirIndice();
         if (indiceAtual.equals("BPLUS")) {
@@ -553,49 +646,99 @@ public class Main {
             System.out.println("Erro ao comprimir a base de dados: " + e.getMessage());
 
         }
-        reconstruirIndice();
     }
 
-    private static void descomprimirBaseDeDados() {
-        System.out.println("Digite o algoritmo que queria descomprimir (Huffman ou LZW): ");
-        String algoritmo = teclado.nextLine().trim();
-        System.out.println("Digite a versão (1 ou 2): ");
-        String versao = teclado.nextLine().trim();
-        String arquivo = "Compressed/" + FILENAME + algoritmo + versao;
-        // Verifica se o arquivo comprimido existe
-        
-        File compressedFile = new File(arquivo);
-        if(!compressedFile.exists()) {
-            System.out.println("Arquivo comprimido não encontrado.");
+  private static void descomprimirBaseDeDados() {
+    System.out.println("Digite o algoritmo que queria descomprimir (Huffman ou LZW): ");
+    String algoritmo = teclado.nextLine().trim();
+    System.out.println("Digite a versão (1 ou 2): ");
+    String versao = teclado.nextLine().trim();
+    String arquivo = "Compressed/" + FILENAME + algoritmo + versao;
+
+    File compressedFile = new File(arquivo);
+    if(!compressedFile.exists()) {
+        System.out.println("Arquivo comprimido não encontrado.");
+        return;
+    }
+
+    File pastaDecompressed = new File("decompressed");
+    if (!pastaDecompressed.exists()) {
+        pastaDecompressed.mkdir();
+    }
+
+    try {
+        byte[] compressedData = new byte[(int) compressedFile.length()];
+        try (FileInputStream fis = new FileInputStream(compressedFile)) {
+            fis.read(compressedData);
+        }
+        long startDecompress = System.currentTimeMillis();
+        byte[] decompressedData;
+        if (algoritmo.equalsIgnoreCase("Huffman")) {
+            decompressedData = Huffman.decompress(compressedData);
+        } else if (algoritmo.equalsIgnoreCase("LZW")) {
+            decompressedData = LZW.decompress(compressedData);
+        } else {
+            System.out.println("Algoritmo inválido.");
             return;
         }
-        
-        try {
-            byte[] compressedData = new byte[(int) compressedFile.length()];
-            try (FileInputStream fis = new FileInputStream(compressedFile)) {
-                fis.read(compressedData);
-            }
-            long startDecompress = System.currentTimeMillis();
-            byte[] decompressedData;
-            if (algoritmo.equalsIgnoreCase("Huffman")) {
-                decompressedData = Huffman.decompress(compressedData);
-            } else if (algoritmo.equalsIgnoreCase("LZW")) {
-                decompressedData = LZW.decompress(compressedData);
-            } else {
-                System.out.println("Algoritmo inválido.");
+        long endDecompress = System.currentTimeMillis();
+
+        // Salva em arquivo separado
+        String outFile = "decompressed/" + FILENAME + algoritmo + versao + ".decompressed";
+        try (FileOutputStream fos = new FileOutputStream(outFile)) {
+            fos.write(decompressedData);
+        }
+        System.out.println("Descompressão (%s) concluída em %d ms".formatted(algoritmo, (endDecompress - startDecompress)));
+        System.out.println("Arquivo descomprimido salvo em: " + outFile);
+
+        // Tente abrir e ler o primeiro registro para validar
+        try (RandomAccessFile raf = new RandomAccessFile(outFile, "r")) {
+            raf.readBoolean(); // lápide
+            int tamanho = raf.readInt();
+            if (tamanho <= 0 || tamanho > raf.length()) {
+                System.out.println("Arquivo descomprimido inválido. Não será reconstruído o índice.");
                 return;
             }
-            long endDecompress = System.currentTimeMillis();
-
-            // Grava os dados descomprimidos de volta no arquivo original
-            try (FileOutputStream fos = new FileOutputStream(FILENAME)) {
-                fos.write(decompressedData);
-            }
-            System.out.println("Descompressão (%s) concluida em %d ms".formatted(algoritmo, (endDecompress - startDecompress)));
-        } catch (IOException e) {
-            System.out.println("Erro ao descomprimir a base de dados: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Arquivo descomprimido inválido: " + e.getMessage());
+            return;
         }
-        reconstruirIndice();
+        boolean arquivoValido = true;
+        try (RandomAccessFile raf = new RandomAccessFile(outFile, "r")) {
+            while (raf.getFilePointer() < raf.length()) {
+                raf.readBoolean(); // lápide
+                int tamanho = raf.readInt();
+                if (tamanho <= 0 || tamanho > raf.length()) {
+                    arquivoValido = false;
+                    break;
+                }
+                raf.skipBytes(tamanho);
+            }
+        } catch (Exception e) {
+            arquivoValido = false;
+        }
+        if (!arquivoValido) {
+            System.out.println("Arquivo descomprimido inválido. Não será reconstruído o índice.");
+            return;
+        }
 
+        // Só reconstrua o índice se o arquivo for válido
+        System.out.println("Deseja substituir o arquivo original pela versão descomprimida? (sim/não): ");
+        String resposta = teclado.nextLine().trim().toLowerCase();
+        if (resposta.equals("sim")) {
+            try {
+            Files.copy(Paths.get(outFile), Paths.get(FILENAME), StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Arquivo original substituído com sucesso.");
+            reconstruirIndice();
+            } catch (IOException e) {
+            System.out.println("Erro ao substituir o arquivo original: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Arquivo original não foi substituído.");
+        }
+
+    } catch (IOException e) {
+        System.out.println("Erro ao descomprimir a base de dados: " + e.getMessage());
     }
+  }
 }
