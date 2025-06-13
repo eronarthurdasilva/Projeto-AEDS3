@@ -9,8 +9,8 @@ public class Main {
     private static Scanner teclado = new Scanner(System.in);
     private static ExtendibleHash hashIndex = new ExtendibleHash(2,4); // Inicializa hashIndex
     private static String indiceAtual = "BPLUS"; // Indica o tipo de índice atual
-
-    // Menu para os comandos do CRUD
+    private static String algoritmoCripto = "AES"; // Algoritmo de criptografia padrão
+    // Menu para os comandos do CRUDss
     public static void main(String[] args) {
         if (baseDeDadosExiste()) {
             System.out.println("Reconstruindo índices a partir do arquivo existente...");
@@ -40,6 +40,9 @@ public class Main {
             System.out.println("12 - Descomprimir base de dados");
             System.out.println("13 - Reconstruir índice B+");
             System.out.println("14 - Reconstruir índice Hash");
+            System.out.println("15 - Buscar padrão em campo");
+            System.out.println("16 - Criptografar base de dados");
+            System.out.println("17 - Descriptografar base de dados");
             System.out.println("0 - Sair");
             System.out.print("Digite a opção desejada: ");
             opcao = teclado.nextInt();
@@ -119,6 +122,17 @@ public class Main {
                     break;
                 case 14:
                     reconstruirHash();
+                    break;
+                case 15:
+                    buscarPadraoEmCampo();
+                    break;
+                case 16:
+                    criptografarBaseDeDadosEmCamadas();
+                    System.out.println("Base de dados criptografada com sucesso!");
+                    break;
+                case 17:
+                    descriptografarBaseDeDadosEmCamadas();
+                    System.out.println("Base de dados descriptografada com sucesso!");
                     break;
                 case 0:
                     // Sai do programa
@@ -427,8 +441,6 @@ public class Main {
     /*
      * Método para reconstruir o índice B+ ou Hash Extendível
      */
-    
-
      private static void reconstruirBPlus() {
         try {
             File f = new File(FILENAME);
@@ -740,5 +752,102 @@ public class Main {
     } catch (IOException e) {
         System.out.println("Erro ao descomprimir a base de dados: " + e.getMessage());
     }
+  }
+
+
+  // Método para buscar um padrão em um campo específico
+  private static void buscarPadraoEmCampo(){
+    System.out.println("\n==============================");
+    System.out.println("       BUSCAR PADRÃO EM CAMPO");
+    System.out.println("==============================");
+    System.out.print("Digite o padrão a ser buscado: ");
+    String padrao = teclado.nextLine();
+    System.out.print("Campo (userID, transactionType): ");
+    String campo = teclado.nextLine();
+    try (RandomAccessFile raf = new RandomAccessFile(FILENAME, "r")) {
+        int encontrados = 0;
+        while (raf.getFilePointer() < raf.length()) {
+            long pos = raf.getFilePointer();
+            boolean lapide = raf.readBoolean();
+            int tam = raf.readInt();
+            byte[] data = new byte[tam];
+            raf.read(data);
+            if (lapide) {
+                Transaction txn = Transaction.fromByteArray(data);
+                String valor = "";
+                if (campo.equalsIgnoreCase("userID")) valor = txn.userID;
+                else if (campo.equalsIgnoreCase("transactionType")) valor = txn.transactionType;
+                else continue;
+                if (PatternMatcher.kmpSearch(valor, padrao)) {
+                    System.out.println("Encontrado no registro ID: " + txn.transactionID + " | " + valor);
+                    encontrados++;
+                }
+            }
+        }
+        System.out.println("Total encontrados: " + encontrados);
+    } catch (Exception e) {
+        System.out.println("Erro na busca: " + e.getMessage());
+    }
+  }
+
+  // Criptografa a base de dados usando AES e César
+  private static void criptografarBaseDeDadosEmCamadas() {
+      File original = new File(FILENAME);
+      if (!original.exists()) {
+          System.out.println("Arquivo de base de dados não encontrado.");
+          return;
+      }
+      try {
+          // 1ª camada: César
+          byte[] inputData = Files.readAllBytes(original.toPath());
+          String conteudo = Base64.getEncoder().encodeToString(inputData);
+          String criptografadoCesar = CryptoUtils.encryptCaesar(conteudo, 3);
+          String arquivoCesar = FILENAME + ".caesar";
+          Files.write(Paths.get(arquivoCesar), criptografadoCesar.getBytes());
+          System.out.println("Arquivo criptografado com César salvo em: " + arquivoCesar);
+
+          // 2ª camada: AES sobre o arquivo César
+          String conteudoCesar = new String(Files.readAllBytes(Paths.get(arquivoCesar)));
+          String criptografadoAES = CryptoUtils.encryptAES(conteudoCesar);
+          String arquivoAES = FILENAME + ".caesar.aes";
+          Files.write(Paths.get(arquivoAES), criptografadoAES.getBytes());
+          System.out.println("Arquivo criptografado com César + AES salvo em: " + arquivoAES);
+
+      } catch (Exception e) {
+          System.out.println("Erro ao criptografar em camadas: " + e.getMessage());
+      }
+  }
+
+  private static void descriptografarBaseDeDadosEmCamadas() {
+      String arquivoAES = FILENAME + ".caesar.aes";
+      File fileAES = new File(arquivoAES);
+      if (!fileAES.exists()) {
+          System.out.println("Arquivo criptografado em camadas não encontrado.");
+          return;
+      }
+      try {
+          // 1ª camada: descriptografa AES
+          String criptografadoAES = new String(Files.readAllBytes(fileAES.toPath()));
+          String conteudoCesar = CryptoUtils.decryptAES(criptografadoAES);
+
+          // 2ª camada: descriptografa César
+          String conteudoBase64 = CryptoUtils.decryptCaesar(conteudoCesar, 3);
+          byte[] dados = Base64.getDecoder().decode(conteudoBase64);
+
+          String outFile = FILENAME + ".decrypted";
+          Files.write(Paths.get(outFile), dados);
+          System.out.println("Arquivo descriptografado salvo em: " + outFile);
+
+          // Pergunta se deseja substituir o original
+          System.out.println("Deseja substituir o arquivo original? (sim/não): ");
+          String resp = teclado.nextLine().trim().toLowerCase();
+          if (resp.equals("sim")) {
+              Files.copy(Paths.get(outFile), Paths.get(FILENAME), StandardCopyOption.REPLACE_EXISTING);
+              System.out.println("Arquivo original substituído.");
+              reconstruirIndice();
+          }
+      } catch (Exception e) {
+          System.out.println("Erro ao descriptografar em camadas: " + e.getMessage());
+      }
   }
 }
