@@ -1,6 +1,17 @@
 # **Projeto AEDs III - Sistema CRUD**
 ### Descrição principal
-Este projeto foi desenvolvido com o objetivo de aplicar os conceitos teóricos aprendidos na disciplina de Algoritmos e Estruturas de Dados III. Ele foi dividido em quatro partes, cada uma abordando tópicos discutidos em sala de aula. O sistema foi implementado inteiramente em Java, uma linguagem na qual possuo grande domínio e experiência. Espero que este projeto seja útil e interessante para quem o explorar.
+Este projeto foi desenvolvido com o objetivo de aplicar os conceitos teóricos aprendidos na disciplina de Algoritmos e Estruturas de Dados III. Ele foi dividido em quatro partes, cada uma abordando tópicos discutidos em sala de aula. O sistema foi implementado inteiramente em Java, uma linguagem na qual possuo grande domínio e experiência. Espero que este projeto seja útil e interessante para quem o explorar
+---
+
+## **Como executar o sistema**
+
+1. Compile todos os arquivos Java do diretório `src`.
+2. Execute a classe principal `Main`.
+3. O menu interativo será exibido no terminal, permitindo acesso a todas as funcionalidades.
+4. Para popular a base, utilize a opção de importar CSV antes de testar as demais funções.
+
+--- 
+
 
 ## Parte I
 ### **📌 Descrição do Projeto**
@@ -31,6 +42,13 @@ A aplicação da Parte I consiste em um sistema CRUD (**Create, Read, Update, De
 #### **Exemplo de uso da lista de tags**
 O usuário pode adicionar múltiplas tags ao criar ou atualizar um registro. Essas tags são armazenadas junto ao registro e exibidas na leitura.
 
+
+#### **Exemplo prático de uso do CRUD**
+- **Create**: O usuário escolhe a opção 2, preenche os campos solicitados e o sistema gera um novo ID.
+- **Read**: O usuário informa o ID desejado e visualiza todos os dados do registro.
+- **Update**: O usuário pode alterar qualquer campo, inclusive adicionar/remover tags.
+- **Delete**: O registro é marcado como excluído, mas não removido fisicamente do arquivo.
+
 ---
 
 ## **📂 Estrutura do Projeto**
@@ -44,6 +62,12 @@ Classe que encapsula os dados de uma transação financeira, com métodos para s
 
 #### **`src/Main.java`**
 Gerencia o fluxo do programa, implementando o menu interativo e as operações CRUD.
+
+#### **Outras Classes**
+- **`PatternMatcher.java`**: Implementa o algoritmo KMP para busca eficiente de padrões.
+- **`CryptoUtils.java`**: Implementa os métodos de criptografia César e AES.
+- **`Huffman.java` e `LZW.java`**: Algoritmos de compressão e descompressão.
+- **`IndexManager.java`, `BPlusTree.java`, `ExtendibleHash.java`**: Gerenciam os índices e otimizam as buscas.
 
 ---
 
@@ -60,7 +84,13 @@ O Hashing Estendido foi implementado para buscas exatas, utilizando um diretóri
 ### **Campo Indexado**
 O campo `transactionID` foi escolhido para indexação por ser único e essencial para identificar os registros. Essa decisão garante eficiência nas operações de busca, inserção e remoção.
 
+#### **Como os índices são usados no CRUD**
+- Toda operação de leitura, atualização ou remoção consulta primeiro o índice para localizar rapidamente o registro no arquivo.
+- Ao inserir ou remover registros, os índices são atualizados automaticamente.
+- O sistema permite alternar entre Árvore B+ e Hashing Estendido conforme a necessidade.
+
 Essas técnicas de indexação foram integradas ao sistema para proporcionar maior desempenho e escalabilidade, atendendo às necessidades de manipulação de grandes volumes de dados.
+
 
 ---
 
@@ -101,6 +131,19 @@ Essas funcionalidades atendem integralmente aos requisitos do trabalho, proporci
 
 Implementação do algoritmo **KMP (Knuth-Morris-Pratt)** para busca eficiente de padrões em campos específicos das transações, como `userID` ou `transactionType`.
 
+#### **Por que usei o KMP?**
+O KMP foi escolhido por ser um algoritmo eficiente para busca de padrões em textos, operando em tempo linear. Isso é fundamental para garantir buscas rápidas mesmo em bases de dados grandes, sem a necessidade de varrer todo o texto de forma ingênua.
+
+#### **Como funciona na prática**
+- O usuário escolhe a opção de busca no menu, informa o padrão e o campo desejado.
+- O sistema percorre apenas os registros ativos, extrai o valor do campo e aplica o KMP.
+- Todos os registros que contêm o padrão são exibidos.
+
+#### **Exemplo de uso**
+15 - Buscar padrão em campo Digite o padrão a ser buscado: Bank Transfer Campo (userID, transactionType): transactionType Encontrado no registro ID: 1 | Bank Transfer Total encontrados: 1
+
+
+
 #### **Decisões de Implementação**
 - Armazenamento em arquivo binário para eficiência e flexibilidade.
 - Indexação com Árvore B+ e Hashing Estendido para otimização.
@@ -126,7 +169,64 @@ A cifra de César foi escolhida por ser simples e ilustrar conceitos básicos de
 O processo inverso (descriptografia) remove as camadas na ordem correta, garantindo a restauração dos dados originais.  
 Essa abordagem atende ao requisito de aplicar pelo menos dois algoritmos distintos e demonstra o entendimento tanto de técnicas clássicas quanto modernas de segurança da informação.
 
+#### **Exemplo prático de criptografia**
+
+**16 - Criptografar base de dados**  
+- O sistema solicita o nome do arquivo de dados.
+- O arquivo é criptografado utilizando a cifra de César e salvo como:  
+  `transactions.db.caesar`
+- Em seguida, pode-se aplicar a criptografia AES sobre o arquivo já cifrado, gerando:  
+  `transactions.db.caesar.aes`
+
+**17 - Descriptografar base de dados**  
+- O usuário informa o arquivo criptografado.
+- O sistema remove as camadas de criptografia na ordem inversa (AES, depois César).
+- O arquivo restaurado é salvo como:  
+  `transactions.db.decrypted`
+
 ---
+
+## **Exemplo do Menu Principal**
+
+```
+============================== MENU PRINCIPAL ==============================
+1  - Carregar base de dados
+2  - Create
+3  - Read
+4  - Update
+5  - Delete
+6  - Imprimir árvore B+
+7  - Trocar índice (Atual: BPLUS)
+8  - Imprimir Hash Extendível
+9  - Verificar consistência dos índices
+10 - Debug Hash Extendível
+11 - Comprimir base de dados
+12 - Descomprimir base de dados
+13 - Reconstruir índice B+
+14 - Reconstruir índice Hash
+15 - Buscar padrão em campo
+16 - Criptografar base de dados
+17 - Descriptografar base de dados
+0  - Sair
+```
+
+---
+
+## **Explicação dos Campos da Transação**
+
+| Campo              | Tipo    | Exemplo              | Descrição                                 |
+|--------------------|---------|----------------------|-------------------------------------------|
+| transactionID      | int     | 10001                | Identificador único do registro           |
+| userID             | String  | USER_1234            | Identificador do usuário                  |
+| transactionAmount  | float   | 150.75               | Valor da transação                        |
+| transactionType    | String  | Bank Transfer        | Tipo da transação                         |
+| timestamp          | String  | 2023-06-07 04:01:00  | Data e hora da transação                  |
+| accountBalance     | float   | 75725.25             | Saldo da conta após a transação           |
+| ...                | ...     | ...                  | ... (demais campos do CSV)                |
+| tags               | String[]| ["fraude", "online"] | Lista de tags associadas ao registro      |
+
+---
+
 
 ## **📋 Testes e Resultados**
 
@@ -137,6 +237,12 @@ Essa abordagem atende ao requisito de aplicar pelo menos dois algoritmos distint
 - Busca de padrões com KMP, comprovando eficiência e precisão mesmo em bases grandes.
 
 ---
+
+## **Considerações Finais**
+
+Este projeto evidencia o domínio prático de estruturas de dados avançadas, técnicas de compressão, criptografia e algoritmos eficientes de busca. Todas as escolhas de implementação priorizaram eficiência, segurança e clareza, tornando o sistema adequado tanto para fins acadêmicos quanto para aplicações reais.
+
+
 
 ## **Autor**
 
