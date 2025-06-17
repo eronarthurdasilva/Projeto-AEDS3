@@ -1,9 +1,10 @@
 # **Projeto AEDs III - Sistema CRUD**
+### Descrição principal
+Este projeto foi desenvolvido com o objetivo de aplicar os conceitos teóricos aprendidos na disciplina de Algoritmos e Estruturas de Dados III. Ele foi dividido em quatro partes, cada uma abordando tópicos discutidos em sala de aula. O sistema foi implementado inteiramente em Java, uma linguagem na qual possuo grande domínio e experiência. Espero que este projeto seja útil e interessante para quem o explorar.
 
 ## Parte I
 ### **📌 Descrição do Projeto**
-
-Este projeto consiste em um sistema CRUD (**Create, Read, Update, Delete**) para manipulação de dados de transações bancárias, utilizando um arquivo binário como base de dados. O sistema também permite importar dados de um arquivo CSV, facilitando a carga inicial da base.
+A aplicação da Parte I consiste em um sistema CRUD (**Create, Read, Update, Delete**) projetado para manipular registros armazenados em um arquivo binário, que serve como base de dados principal. Além disso, o sistema oferece suporte à importação de dados a partir de arquivos CSV, permitindo uma carga inicial eficiente e prática. Essa funcionalidade é especialmente útil para integrar dados existentes ou realizar migrações de outras fontes. O sistema foi desenvolvido com foco na flexibilidade e na robustez, garantindo que os registros possam ser criados, lidos, atualizados e excluídos de forma eficiente, enquanto mantém a integridade dos dados.
 
 #### **Tipos de Dados Atendidos**
 - **ID do registro**: Campo `transactionID` (int), gerenciado automaticamente e salvo no cabeçalho do arquivo.
@@ -46,39 +47,52 @@ Gerencia o fluxo do programa, implementando o menu interativo e as operações C
 
 ---
 
-## **📈 Melhorias Futuras**
-
-- Implementação de uma interface gráfica para facilitar a interação.
-- Validações mais robustas para entradas.
-- Integração com banco de dados relacional para maior escalabilidade.
-- Adição de algoritmos de detecção de fraudes.
-
----
-
 ## Parte II
 ### **📌 Manipulação Indexada da Base de Dados**
+Nesta etapa, implementei indexação na base de dados utilizando **Árvore B+** e **Hashing Estendido**, com o objetivo de otimizar as operações CRUD e melhorar a eficiência nas buscas. A escolha desses métodos foi baseada em suas características específicas:
 
-Nesta etapa, foi implementada indexação na base de dados utilizando **Árvore B+** e **Hashing Estendido**, otimizando as operações CRUD.
+### **Árvore B+**
+A Árvore B+ foi utilizada como índice principal devido à sua eficiência em buscas sequenciais e operações de intervalo. As folhas da árvore armazenam pares `(id, posiçãoNoArquivo)`, permitindo acesso rápido aos registros. A ordem da árvore é parametrizável, garantindo flexibilidade para diferentes volumes de dados.
 
-#### **Estrutura de Indexação com Árvore B+**
-A Árvore B+ foi escolhida como índice principal pela eficiência em buscas sequenciais. As folhas armazenam pares `(id, posiçãoNoArquivo)` e a ordem da árvore é parametrizável.
+### **Hashing Estendido**
+O Hashing Estendido foi implementado para buscas exatas, utilizando um diretório dinâmico que aponta para buckets. Esses buckets crescem conforme necessário, garantindo que o sistema se adapte ao aumento do número de registros sem comprometer a performance.
 
-#### **Estrutura de Indexação com Hashing Estendido**
-O Hashing Estendido foi implementado para buscas exatas, utilizando um diretório com ponteiros para buckets que crescem dinamicamente.
+### **Campo Indexado**
+O campo `transactionID` foi escolhido para indexação por ser único e essencial para identificar os registros. Essa decisão garante eficiência nas operações de busca, inserção e remoção.
 
-#### **Campo Indexado**
-O campo `transactionID` foi indexado por ser único e garantir eficiência nas operações.
+Essas técnicas de indexação foram integradas ao sistema para proporcionar maior desempenho e escalabilidade, atendendo às necessidades de manipulação de grandes volumes de dados.
 
 ---
 
 ## Parte III
 ### **📌 Compressão de Dados na Base de Dados**
+Nesta etapa do projeto, implementei funcionalidades completas de compressão e descompressão da base de dados utilizando os algoritmos **Huffman** e **LZW**, conforme solicitado no trabalho. O objetivo foi otimizar o armazenamento e a transferência dos dados, além de permitir comparar o desempenho dos algoritmos em diferentes cenários.
 
-Adicionou-se suporte à compressão e descompressão da base de dados utilizando os algoritmos **Huffman** e **LZW**, permitindo ao usuário reduzir o espaço ocupado pelo arquivo e comparar o desempenho dos algoritmos.
+#### **Funcionalidades Implementadas**
+- **Menu Interativo**: O sistema apresenta opções no menu principal para que eu possa escolher entre compressão e descompressão da base de dados.
+- **Compressão**: Ao selecionar a compressão, a base de dados é processada integralmente (incluindo cabeçalho, registros, tamanhos de strings, etc.) por ambos os algoritmos. São gerados dois arquivos, seguindo o padrão:  
+  `nomeArquivoNomeAlgoritmoCompressaoX`  
+  onde `nomeArquivo` é o nome original, `NomeAlgoritmo` é "Huffman" ou "LZW", e `X` representa a versão da compressão.
+- **Exibição de Resultados**: Após a compressão, o sistema exibe:
+  - Porcentagem de ganho ou perda de espaço para cada algoritmo.
+  - Tempo de execução de cada compressão.
+  - Comparação direta, indicando qual algoritmo foi mais eficiente para aquele caso.
+- **Descompressão**: Posso escolher descompactar qualquer versão gerada, informando o número da versão desejada. O arquivo descomprimido substitui a base de dados original.
+- **Comparação na Descompressão**: O sistema também mostra o tempo de execução de cada algoritmo na descompressão e indica qual foi mais eficiente.
+- **Dicionário LZW**: Defini o dicionário inicial do LZW conforme as características dos dados do projeto, visando melhor desempenho para os padrões presentes nos registros.
 
-#### **Funcionalidades**
-- **Compressão**: Geração de arquivos comprimidos e exibição de taxa e tempo de compressão.
-- **Descompressão**: Restauração do arquivo original com exibição do tempo de descompressão.
+#### **Decisões de Implementação**
+- A compressão é aplicada a todo o conteúdo do arquivo binário, garantindo integridade e eficiência.
+- Os algoritmos foram integrados de modo transparente ao fluxo do sistema, permitindo fácil uso.
+- O sistema foi projetado para facilitar a comparação entre Huffman e LZW, tanto em compressão quanto em descompressão, promovendo análise detalhada de eficiência.
+- O controle de versões permite manter múltiplos arquivos comprimidos e restaurar qualquer versão desejada.
+
+#### **Testes e Resultados**
+- Realizei testes com diferentes volumes de dados e padrões de registros, avaliando a taxa de compressão, tempo de execução e fidelidade dos dados após descompressão.
+- Os resultados mostraram que o desempenho dos algoritmos varia conforme o perfil dos dados, sendo Huffman mais eficiente em dados com alta redundância e LZW em padrões repetitivos.
+- Todos os testes confirmaram a integridade dos dados após compressão e descompressão, validando a robustez da implementação.
+
+Essas funcionalidades atendem integralmente aos requisitos do trabalho, proporcionando controle total sobre a compressão e descompressão da base de dados, além de uma análise comparativa clara entre os algoritmos implementados.
 
 ---
 
